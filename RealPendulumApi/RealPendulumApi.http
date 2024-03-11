@@ -1,0 +1,6 @@
+@RealPendulumApi_HostAddress = http://localhost:5068
+
+GET {{RealPendulumApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
