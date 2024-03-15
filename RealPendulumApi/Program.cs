@@ -1,3 +1,5 @@
+using RealPendulumApi;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,15 +8,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        "AllowAnyOrigin",
-        builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-        }
-    );
+  options.AddPolicy(
+    "AllowAnyOrigin",
+    builder =>
+    {
+      builder.AllowAnyOrigin();
+      builder.AllowAnyMethod();
+      builder.AllowAnyHeader();
+    }
+  );
 });
 
 var app = builder.Build();
@@ -22,77 +24,71 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing",
-    "Bracing",
-    "Chilly",
-    "Cool",
-    "Mild",
-    "Warm",
-    "Balmy",
-    "Hot",
-    "Sweltering",
-    "Scorching"
-};
+app.MapGet(
+    "/pendulum/ode",
+    (
+      double duration = 10.0,
+      double timeStep = 10.0,
+      double acceleration = 9.81,
+      double length = 1.0,
+      double initialAngle = 0.1,
+      double initialSpeed = 0.0,
+      bool isExact = true
+    ) =>
+    {
+      var points = new ODESolver
+      {
+        Params = new Parameters
+        {
+          Duration = duration,
+          TimeStep = timeStep,
+          Acceleration = acceleration,
+          Length = length,
+          InitialAngle = initialAngle,
+          InitialSpeed = initialSpeed,
+          IsExact = isExact
+        }
+      }.Solve();
+      return points.ToODEPoints();
+    }
+  )
+  .WithName("GetPendulumSolution")
+  .WithOpenApi();
 
 app.MapGet(
-        "/weatherforecast",
-        () =>
-        {
-            var forecast = Enumerable
-                .Range(1, 5)
-                .Select(index => new WeatherForecast(
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-                .ToArray();
-            return forecast;
-        }
-    )
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+  "/pendulum/approx",
+  (
+    double duration = 10,
+    double timeStep = 10,
+    double acceleration = 9.81,
+    double length = 1,
+    double initialAngle = 0.1,
+    double initialSpeed = 0.0
+  ) =>
+  {
+    var points = new ApproxSolver
+    {
+      Params =
+      {
+        Duration = duration,
+        TimeStep = timeStep,
+        Acceleration = acceleration,
+        Length = length,
+        InitialAngle = initialAngle,
+        InitialSpeed = initialSpeed
+      }
+    }.Solve();
 
-app.MapGet(
-        "/realode",
-        () =>
-        {
-            var points = MathNetExample.SolveRealODE(20, 10);
-            return points.Select((y, i) => new ODEPoint { Time = i / 100.0, Value = y }).ToArray();
-        }
-    )
-    .WithName("SolveRealODE")
-    .WithOpenApi();
-
-app.MapGet(
-        "/fakeode",
-        () =>
-        {
-            var points = MathNetExample.SolveFakeODE(20, 10);
-            return points.Select((y, i) => new ODEPoint { Time = i / 100.0, Value = y }).ToArray();
-        }
-    )
-    .WithName("SolveFakeODE")
-    .WithOpenApi();
+    return points.ToODEPoints();
+  }
+);
 
 app.UseCors("AllowAnyOrigin");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-
-record ODEPoint()
-{
-    public double Time { get; init; }
-    public double Value { get; init; }
-}
