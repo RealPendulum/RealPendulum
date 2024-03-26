@@ -7,12 +7,12 @@ if len(args) != 7:
     sys.stderr.write("Invalid number of arguments. Expected 6 arguments.")
     sys.exit(1)
 
-duration = float(args[0])
-timeStep = float(args[1]) / 1000
-acceleration = float(args[2])
-length = float(args[3])
-initialAngle = float(args[4])
-initialSpeed = float(args[5])
+duration = float(args[0].replace(",", "."))
+timeStep = float(args[1].replace(",", ".")) / 1000
+acceleration = float(args[2].replace(",", "."))
+length = float(args[3].replace(",", "."))
+initialAngle = float(args[4].replace(",", "."))
+initialSpeed = float(args[5].replace(",", "."))
 isExact = bool(args[6])
 
 omega = np.sqrt(acceleration / length)

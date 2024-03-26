@@ -1,8 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { printEveryFrame } from "./refreshFrequency";
 
 export default function Home() {
+  useEffect(() => {
+    const job = printEveryFrame();
+    return () => {
+      cancelAnimationFrame(job.job);
+    };
+  });
   // const [backgroundColor, setBackgroundColor] = useState("black");
   return (
     <div
