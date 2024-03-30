@@ -23,11 +23,17 @@ public class ODESolver
 
     var N = (int)(Params.Duration * 1000 / Params.TimeStep);
 
-    var solution = RungeKutta.SecondOrder(
+    // var solution = RungeKutta.SecondOrder(
+    // y0,
+    // start,
+    // Params.Duration,
+    // N,
+    // Params.IsExact ? PendulumExact : PendulumApprox
+    // );
+
+    var solution = SecondOrder(
       y0,
-      start,
-      Params.Duration,
-      N,
+      Params.TimeStep / 1000,
       Params.IsExact ? PendulumExact : PendulumApprox
     );
 
@@ -60,6 +66,43 @@ public class ODESolver
       [y[1], -Params.Acceleration / Params.Length * y[0]]
     );
   }
+
+  // Taken from MathNet.Numerics.OdeSolvers.RungeKutta
+  public static Vector<double>[] SecondOrder(
+    Vector<double> y0,
+    double step,
+    // double start,
+    // double end,
+    // int N,
+    Func<double, Vector<double>, Vector<double>> f
+  )
+  {
+    int passes = 0;
+    double start = y0[0];
+    const int MAGIC_NUMBER = 2048;
+    Vector<double>[] array = new Vector<double>[MAGIC_NUMBER];
+    double current = 0;
+    array[0] = y0;
+    int length = 1;
+    for (; length < MAGIC_NUMBER && passes < 2; length++)
+    {
+      Vector<double> vector = f(current, y0);
+      Vector<double> vector2 = f(current, y0 + vector * step);
+      array[length] = y0 + step * 0.5 * (vector + vector2);
+      if (
+        (y0[0] < start && array[length][0] > start)
+        || (y0[0] > start && array[length][0] < start)
+      )
+      {
+        passes++;
+      }
+      current += step;
+      y0 = array[length];
+    }
+
+    Console.WriteLine($"Length: {length}, Passes: {passes}");
+    return array.Take(length - 1).ToArray();
+  }
 }
 
 public class AnalyticSolver
@@ -73,7 +116,9 @@ public class AnalyticSolver
   {
     Stopwatch stopwatch = Stopwatch.StartNew();
 
-    var N = (int)(Params.Duration * 1000 / Params.TimeStep);
+    Params.Duration = 2 * Math.PI / Omega;
+
+    var N = (int)(Params.Duration * 1000 / Params.TimeStep) + 1;
 
     var timeStepInSeconds = Params.TimeStep / 1000;
 

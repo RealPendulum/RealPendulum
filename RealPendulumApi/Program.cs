@@ -37,8 +37,8 @@ app.MapGet(
       double timeStep = 10.0,
       double acceleration = 9.81,
       double length = 1.0,
-      double initialAngle = 0.1,
-      double initialSpeed = 0.0,
+      double initialAngle = 0,
+      double initialSpeed = 0.1,
       bool isExact = true
     ) =>
     {
@@ -68,8 +68,8 @@ app.MapGet(
     double timeStep = 10,
     double acceleration = 9.81,
     double length = 1,
-    double initialAngle = 0.1,
-    double initialSpeed = 0.0
+    double initialAngle = 0,
+    double initialSpeed = 0.1
   ) =>
   {
     Console.WriteLine("Approximation");

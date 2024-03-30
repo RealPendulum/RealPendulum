@@ -1,9 +1,14 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type SetStateAction,
+  type Dispatch,
+} from "react";
 import axios from "axios";
 
 export default function Home() {
-  // const [backgroundColor, setBackgroundColor] = useState("black");
   return (
     <div
       style={{
@@ -16,90 +21,29 @@ export default function Home() {
         backgroundColor: "#e5ddf0",
       }}
     >
-      {/* <button onClick={() => setBackgroundColor("red")}>Red</button> */}
-      {/* <Counter backgroundColor={backgroundColor} /> */}
       <Pendulums />
     </div>
   );
 }
 
-// function Counter({ backgroundColor }) {
-//   const [count, setCount] = useState(0);
-
-//   function increment() {
-//     setCount(count + 1);
-//     console.log(count);
-//   }
-
-//   return (
-//     <div style={{ backgroundColor }}>
-//       <h1>{count}</h1>
-//       {/* <button onClick={() => setCount(count + 1)}>Increment</button>
-//        */}
-//       <button onClick={increment}>Increment</button>
-//     </div>
-//   );
-// }
-
 function Pendulums() {
-  const [angles, setAngles] = useState({
-    exactODE: 0,
-    approxODE: 0,
-    approx: 0,
-  });
-  const startTimestamp = useRef(0);
+  const [exactODEAngle, setExactODEAngle] = useState(0);
+  const [approxAngle, setApproxAngle] = useState(0);
   const dataLength = useRef(0);
-  const exactODEData = useRef<any>(null);
-  const approxODEData = useRef<any>(null);
-  const approxData = useRef<any>(null);
-
-  const frame = useRef(0);
-
-  function loop() {
-    const timestamp = performance.now();
-    if (startTimestamp.current === 0) {
-      startTimestamp.current = timestamp;
-    }
-    // console.log(frame.current, dataLength.current);
-    if (frame.current >= dataLength.current) {
-      return;
-    }
-
-    const userTime = (timestamp - startTimestamp.current) / 1000;
-    while (exactODEData.current[frame.current].time <= userTime) {
-      frame.current = frame.current + 1;
-    }
-
-    const currentExactODEAngle = exactODEData.current[frame.current].value;
-    const currentApproxOdeAngle = approxODEData.current[frame.current].value;
-    const currentApproxAngle = approxData.current[frame.current].value;
-
-    setAngles({
-      exactODE: currentExactODEAngle,
-      approxODE: currentApproxOdeAngle,
-      approx: currentApproxAngle,
-    });
-
-    requestAnimationFrame(loop);
-  }
+  const exactODEData = useRef<Data>([]);
+  const approxData = useRef<Data>([]);
 
   useEffect(() => {
+    let isCancelled = false;
     const initialAngle = 0;
     const initialSpeed = 2;
-    const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}`;
+    const timeStep = 4;
+    const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    let job = { job: 0 };
     axios
       .get(`http://localhost:5068/pendulum/ode?${queryParam}`)
       .then((response) => {
         exactODEData.current = response.data;
-        // data = response.data;
-      })
-      .then(() => {
-        return axios.get(
-          `http://localhost:5068/pendulum/ode?isExact=false&${queryParam}`
-        );
-      })
-      .then((response) => {
-        approxODEData.current = response.data;
       })
       .then(() => {
         return axios.get(`http://localhost:5068/pendulum/approx?${queryParam}`);
@@ -107,14 +51,21 @@ function Pendulums() {
       .then((response) => {
         approxData.current = response.data;
         dataLength.current = response.data.length - 1;
-        requestAnimationFrame(loop);
+        if (isCancelled) return;
+        job = startLoop(exactODEData.current, setExactODEAngle);
+        startLoop(approxData.current, setApproxAngle);
       });
+    return () => {
+      const jobNumber = job.job;
+      isCancelled = true;
+      cancelAnimationFrame(jobNumber);
+    };
   }, []);
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start" }}>
-      <Pendulum color="lightgreen" angle={angles.exactODE} />
-      <Pendulum color="aquamarine" angle={angles.approx} />
+    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
+      <Pendulum color="lightgreen" angle={exactODEAngle} />
+      <Pendulum color="aquamarine" angle={approxAngle} />
     </div>
   );
 }
@@ -123,9 +74,13 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
   return (
     <div
       style={{
-        width: 900,
-        height: 900,
+        width: 720,
+        height: 720,
         position: "relative",
+        borderWidth: "4px",
+        borderColor: "white",
+        borderRadius: "20%",
+        margin: "10px",
       }}
     >
       <div
@@ -140,7 +95,7 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
           style={{
             position: "absolute",
             width: "4px",
-            height: "400px",
+            height: "300px",
             backgroundColor: "black",
             borderRadius: "2px",
           }}
@@ -153,7 +108,7 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
             borderRadius: "50%",
             backgroundColor: color,
             left: "-23px",
-            top: "395px",
+            top: "295px",
             borderWidth: "4px",
             borderColor: "black",
           }}
@@ -162,3 +117,34 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
     </div>
   );
 }
+
+function startLoop(
+  data: Data,
+  setAngle: Dispatch<SetStateAction<number>>
+): { job: number } {
+  let startTimestamp = performance.now();
+  let frame = 0;
+  const dataLength = data.length;
+  let job = { job: requestAnimationFrame(loop) };
+  return job;
+
+  function loop() {
+    const timestamp = performance.now();
+    const userTime = (timestamp - startTimestamp) / 1000;
+
+    while (data[frame].time <= userTime) {
+      frame = frame + 1;
+      if (frame >= dataLength) {
+        frame = 0;
+        startTimestamp = timestamp;
+        break;
+      }
+    }
+
+    const angle = data[frame].value;
+    setAngle(angle);
+    job.job = requestAnimationFrame(loop);
+  }
+}
+
+type Data = { time: number; value: number }[];
