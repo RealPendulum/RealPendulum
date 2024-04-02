@@ -3,14 +3,36 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { printEveryFrame } from "./refreshFrequency";
 
-export default function Home() {
+function FpsCounter() {
+  const [fpsValue, setFpsValue] = useState(0);
+
   useEffect(() => {
-    const job = printEveryFrame();
+    const job = printEveryFrame(setFpsValue);
     return () => {
-      cancelAnimationFrame(job.job);
+      cancelAnimationFrame(job.id);
     };
-  });
-  // const [backgroundColor, setBackgroundColor] = useState("black");
+  }, []);
+
+  return (
+    <div
+      style={{
+        // position: "relative",
+        // top: "0",
+        // left: "50%",
+        width: "20%",
+        height: "20%",
+        backgroundColor: "blue",
+        color: "white",
+        fontSize: "30px",
+        // alignContent: "center",
+      }}
+    >
+      {fpsValue.toFixed(0)}
+    </div>
+  );
+}
+
+export default function Home() {
   return (
     <div
       style={{
@@ -20,33 +42,17 @@ export default function Home() {
         width: "100%",
         height: "100%",
         zIndex: -1,
-        backgroundColor: "#e5ddf0",
+        backgroundColor: "red",
+        // justifyContent: "center",
+        // alignContent: "center",
+        // backgroundColor: "#e5ddf0",
       }}
     >
-      {/* <button onClick={() => setBackgroundColor("red")}>Red</button> */}
-      {/* <Counter backgroundColor={backgroundColor} /> */}
+      <FpsCounter />
       <Pendulums />
     </div>
   );
 }
-
-// function Counter({ backgroundColor }) {
-//   const [count, setCount] = useState(0);
-
-//   function increment() {
-//     setCount(count + 1);
-//     console.log(count);
-//   }
-
-//   return (
-//     <div style={{ backgroundColor }}>
-//       <h1>{count}</h1>
-//       {/* <button onClick={() => setCount(count + 1)}>Increment</button>
-//        */}
-//       <button onClick={increment}>Increment</button>
-//     </div>
-//   );
-// }
 
 function Pendulums() {
   const [angles, setAngles] = useState({
