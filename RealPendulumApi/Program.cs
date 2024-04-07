@@ -37,14 +37,13 @@ app.MapGet(
       double timeStep = 10.0,
       double acceleration = 9.81,
       double length = 1.0,
-      double initialAngle = 0.1,
-      double initialSpeed = 0.0,
+      double initialAngle = 0,
+      double initialSpeed = 0.1,
       bool isExact = true
     ) =>
     {
-      var points = new ODESolver
-      {
-        Params = new Parameters
+      var points = ODESolver.Solve(
+        new Parameters
         {
           Duration = duration,
           TimeStep = timeStep,
@@ -54,8 +53,9 @@ app.MapGet(
           InitialSpeed = initialSpeed,
           IsExact = isExact
         }
-      }.Solve();
-      return points.ToODEPoints();
+      );
+
+      return points;
     }
   )
   .WithName("GetPendulumSolution")
@@ -68,24 +68,25 @@ app.MapGet(
     double timeStep = 10,
     double acceleration = 9.81,
     double length = 1,
-    double initialAngle = 0.1,
-    double initialSpeed = 0.0
+    double initialAngle = 0,
+    double initialSpeed = 0.1
   ) =>
   {
-    var points = new ApproxSolver
-    {
-      Params =
+    Console.WriteLine("Approximation");
+    var points = AnalyticSolver.Solve(
+      new Parameters
       {
         Duration = duration,
         TimeStep = timeStep,
         Acceleration = acceleration,
         Length = length,
         InitialAngle = initialAngle,
-        InitialSpeed = initialSpeed
+        InitialSpeed = initialSpeed,
+        IsExact = false
       }
-    }.Solve();
+    );
 
-    return points.ToODEPoints();
+    return points;
   }
 );
 

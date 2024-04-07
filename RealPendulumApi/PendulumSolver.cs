@@ -1,118 +1,177 @@
 using System.Diagnostics;
-using Newtonsoft.Json.Linq;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.OdeSolvers;
 
 namespace RealPendulumApi;
 
 public class ODESolver
 {
-  public Solution Solve()
+  public static ODEPoint[] Solve(Parameters parameters)
+  {
+    return new ODESolver { Params = parameters }.SolveODE();
+  }
+
+  private ODEPoint[] SolveODE()
   {
     Stopwatch stopwatch = Stopwatch.StartNew();
 
-    var pythonOutput = RunPythonODESolver();
+    var y0 = Vector<double>.Build.Dense(
+      [Params.InitialAngle, Params.InitialSpeed]
+    );
 
-    string output = pythonOutput.StdOut;
-    string error = pythonOutput.StdErr;
+    var start = 0;
 
-    Console.Error.WriteLine(error);
+    var N = (int)(Params.Duration * 1000 / Params.TimeStep);
 
-    var jsonObject = JObject.Parse(output);
+    // var solution = RungeKutta.SecondOrder(
+    // y0,
+    // start,
+    // Params.Duration,
+    // N,
+    // Params.IsExact ? PendulumExact : PendulumApprox
+    // );
 
-    JArray y_t = (JArray)jsonObject["y"]!;
-    JArray t = (JArray)jsonObject["t"]!;
+    var solution = SecondOrder(
+      y0,
+      Params.TimeStep / 1000,
+      Params.IsExact ? PendulumExact : PendulumApprox
+    );
 
-    var solution = new Solution
-    {
-      y_t = y_t.Select(j => (double)j).ToArray(),
-      t = t.Select(j => (double)j).ToArray()
-    };
+    var timeStepInSeconds = Params.TimeStep / 1000;
+
+    var points = solution
+      .Select(
+        (y, i) => new ODEPoint { Time = i * timeStepInSeconds, Value = y[0] }
+      )
+      .ToArray();
 
     stopwatch.Stop();
-    Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
+    // Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
 
-    return solution;
+    return points;
   }
 
-  private PythonOutput RunPythonODESolver()
+  private Parameters Params { get; set; } = new();
+
+  private Vector<double> PendulumExact(double t, Vector<double> y)
   {
-    ProcessStartInfo processStartInfo =
-      new()
-      {
-        FileName = PythonUtils._pythonPath,
-        Arguments =
-          $"{PythonUtils._pythonOdeSolverPath} {Params.Duration} {Params.TimeStep} {Params.Acceleration} {Params.Length} {Params.InitialAngle} {Params.InitialSpeed} {Params.IsExact}",
-        UseShellExecute = false,
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        CreateNoWindow = true
-      };
-
-    Process process = new() { StartInfo = processStartInfo };
-    process.Start();
-    string output = process.StandardOutput.ReadToEnd();
-    string error = process.StandardError.ReadToEnd();
-    process.WaitForExit();
-
-    return new PythonOutput { StdOut = output, StdErr = error };
+    return Vector<double>.Build.Dense(
+      [y[1], -Params.Acceleration / Params.Length * Math.Sin(y[0])]
+    );
   }
 
-  public Parameters Params { get; set; } = new();
+  private Vector<double> PendulumApprox(double t, Vector<double> y)
+  {
+    return Vector<double>.Build.Dense(
+      [y[1], -Params.Acceleration / Params.Length * y[0]]
+    );
+  }
+
+  // Taken from MathNet.Numerics.OdeSolvers.RungeKutta
+  public static Vector<double>[] SecondOrder(
+    Vector<double> y0,
+    double step,
+    // double start,
+    // double end,
+    // int N,
+    Func<double, Vector<double>, Vector<double>> f
+  )
+  {
+    int passes = 0;
+    double start = y0[0];
+    const int MAGIC_NUMBER = 2048;
+    Vector<double>[] array = new Vector<double>[MAGIC_NUMBER];
+    double current = 0;
+    array[0] = y0;
+    int length = 1;
+    for (; length < MAGIC_NUMBER && passes < 2; length++)
+    {
+      Vector<double> vector = f(current, y0);
+      Vector<double> vector2 = f(current, y0 + vector * step);
+      array[length] = y0 + step * 0.5 * (vector + vector2);
+      if (
+        (y0[0] < start && array[length][0] > start)
+        || (y0[0] > start && array[length][0] < start)
+      )
+      {
+        passes++;
+      }
+      current += step;
+      y0 = array[length];
+    }
+
+    Console.WriteLine($"Length: {length}, Passes: {passes}");
+    return array.Take(length - 1).ToArray();
+  }
 }
 
-public class ApproxSolver
+public class AnalyticSolver
 {
-  public Solution Solve()
+  public static ODEPoint[] Solve(Parameters parameters)
+  {
+    return new AnalyticSolver(parameters).SolveAnalytic();
+  }
+
+  private ODEPoint[] SolveAnalytic()
   {
     Stopwatch stopwatch = Stopwatch.StartNew();
 
-    var pythonOutput = RunPythonApproxSolver();
+    Params.Duration = 2 * Math.PI / Omega;
 
-    string output = pythonOutput.StdOut;
-    string error = pythonOutput.StdErr;
+    var N = (int)(Params.Duration * 1000 / Params.TimeStep) + 1;
 
-    Console.Error.WriteLine(error);
+    var timeStepInSeconds = Params.TimeStep / 1000;
 
-    var jsonObject = JObject.Parse(output);
-
-    JArray y_t = (JArray)jsonObject["y"]!;
-    JArray t = (JArray)jsonObject["t"]!;
-
-    var solution = new Solution
-    {
-      y_t = y_t.Select(j => (double)j).ToArray(),
-      t = t.Select(j => (double)j).ToArray()
-    };
+    var points = new ODEPoint[N]
+      .Select(
+        (_, i) =>
+          new ODEPoint
+          {
+            Time = i * timeStepInSeconds,
+            Value = PendulumApproxSolved(i * timeStepInSeconds)
+          }
+      )
+      .ToArray();
 
     stopwatch.Stop();
-    Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
+    // Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
 
-    return solution;
+    return points;
   }
 
-  private PythonOutput RunPythonApproxSolver()
+  private double PendulumApproxSolved(double t)
   {
-    ProcessStartInfo processStartInfo =
-      new()
-      {
-        FileName = PythonUtils._pythonPath,
-        Arguments =
-          $"{PythonUtils._pythonApproxSolverPath} {Params.Duration} {Params.TimeStep} {Params.Acceleration} {Params.Length} {Params.InitialAngle} {Params.InitialSpeed} {Params.IsExact}",
-        UseShellExecute = false,
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        CreateNoWindow = true
-      };
-
-    Process process = new() { StartInfo = processStartInfo };
-    process.Start();
-    string output = process.StandardOutput.ReadToEnd();
-    string error = process.StandardError.ReadToEnd();
-    process.WaitForExit();
-
-    return new PythonOutput { StdOut = output, StdErr = error };
+    return Amplitude * Math.Sin(Omega * t + PhaseShift);
   }
 
-  public Parameters Params { get; set; } = new();
+  private Parameters Params { get; set; } = new();
+
+  private double Omega { get; set; }
+
+  private double PhaseShift { get; set; }
+
+  private double Amplitude { get; set; }
+
+  private AnalyticSolver(Parameters parameters)
+  {
+    Params = parameters;
+    Omega = Math.Sqrt(Params.Acceleration / Params.Length);
+    if (Params.InitialSpeed == 0)
+    {
+      PhaseShift = Math.PI / 2 * Math.Sign(Params.InitialAngle);
+      Amplitude = Params.InitialAngle;
+    }
+    else if (Params.InitialAngle == 0)
+    {
+      PhaseShift = 0;
+      Amplitude = Params.InitialSpeed / Omega;
+    }
+    else
+    {
+      PhaseShift = Math.Atan(Params.InitialAngle * Omega / Params.InitialSpeed);
+      Amplitude = Params.InitialSpeed / Omega / Math.Sin(PhaseShift);
+    }
+  }
 }
 
 public record Parameters
@@ -126,34 +185,8 @@ public record Parameters
   public bool IsExact { get; set; }
 }
 
-public class Solution
-{
-  public double[] y_t;
-  public double[] t;
-
-  public ODEPoint[] ToODEPoints()
-  {
-    return y_t.Select((y, i) => new ODEPoint { Time = t[i], Value = y })
-      .ToArray();
-  }
-}
-
 public record ODEPoint()
 {
   public double Time { get; init; }
   public double Value { get; init; }
-}
-
-struct PythonOutput
-{
-  public string StdOut { get; set; }
-  public string StdErr { get; set; }
-}
-
-public static class PythonUtils
-{
-  public static readonly string _pythonPath = "python3";
-  public static readonly string _pythonOdeSolverPath = "odeSolver.py";
-
-  public static readonly string _pythonApproxSolverPath = "approxSolver.py";
 }
