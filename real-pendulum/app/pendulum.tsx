@@ -8,51 +8,109 @@ import {
 } from "react";
 import axios from "axios";
 
-export function Pendulums() {
-  const [exactODEAngle, setExactODEAngle] = useState(0);
-  const [approxAngle, setApproxAngle] = useState(0);
-  const dataLength = useRef(0);
-  const exactODEData = useRef<Data>([]);
-  const approxData = useRef<Data>([]);
+export function TwoPendulums() {
+  const [isWaitingToStart, setIsWaitingToStart] = useState(true);
+  const readyCount = useRef(0);
 
-  useEffect(() => {
-    let isCancelled = false;
-    const initialAngle = 0;
-    const initialSpeed = 2;
-    const timeStep = 4;
-    const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
-    let job = { job: 0 };
-    axios
-      .get(`http://localhost:5068/pendulum/ode?${queryParam}`)
-      .then((response) => {
-        exactODEData.current = response.data;
-      })
-      .then(() => {
-        return axios.get(`http://localhost:5068/pendulum/approx?${queryParam}`);
-      })
-      .then((response) => {
-        approxData.current = response.data;
-        dataLength.current = response.data.length - 1;
-        if (isCancelled) return;
-        job = startLoop(exactODEData.current, setExactODEAngle);
-        startLoop(approxData.current, setApproxAngle);
-      });
-    return () => {
-      const jobNumber = job.job;
-      isCancelled = true;
-      cancelAnimationFrame(jobNumber);
-    };
-  }, []);
+  const startAnimation = () => {
+    readyCount.current += 1;
+    if (readyCount.current == 2) {
+      setIsWaitingToStart(false);
+    }
+  };
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
-      <Pendulum color="lightgreen" angle={exactODEAngle} />
-      <Pendulum color="aquamarine" angle={approxAngle} />
+      <PendulumContainer
+        isWaitingToStart={isWaitingToStart}
+        color="lightgreen"
+        onReady={startAnimation}
+        pendulumParams={{
+          initialAngle: 0,
+          initialSpeed: 2,
+          timeStep: 4,
+          pendulumType: PendulumType.ODE,
+        }}
+      />
+      <PendulumContainer
+        isWaitingToStart={isWaitingToStart}
+        color="aquamarine"
+        onReady={startAnimation}
+        pendulumParams={{
+          initialAngle: 0,
+          initialSpeed: 2,
+          timeStep: 4,
+          pendulumType: PendulumType.Approximation,
+        }}
+      />
     </div>
   );
 }
 
-export function Pendulum({ color, angle }: { color: string; angle: number }) {
+export function PendulumContainer({
+  isWaitingToStart,
+  color,
+  onReady,
+  pendulumParams: { initialAngle, initialSpeed, timeStep, pendulumType },
+}: PendulumContainerProps) {
+  const [angle, setAngle] = useState(0);
+  const data = useRef<Data>([]);
+  const [isReady, setIsReady] = useState(false);
+  const job = useRef<{ job: number }>({ job: -1 });
+
+  useEffect(() => {
+    cancelAnimationFrame(job.current.job);
+    const endpoint =
+      pendulumType == PendulumType.ODE
+        ? "ode"
+        : pendulumType == PendulumType.Approximation
+        ? "approx"
+        : "ode";
+    const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    axios
+      .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
+      .then((response) => {
+        data.current = response.data;
+      })
+      .then(() => {
+        onReady && onReady();
+        setIsReady(true);
+      });
+  }, [initialAngle, initialSpeed, timeStep, pendulumType, onReady]);
+
+  useEffect(() => {
+    cancelAnimationFrame(job.current.job);
+    if (!isWaitingToStart && isReady) {
+      job.current = startLoop(data.current, setAngle);
+    }
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [isWaitingToStart, isReady]);
+
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
+      <Pendulum color={color} angle={angle} />
+    </div>
+  );
+}
+
+interface PendulumContainerProps {
+  isWaitingToStart: boolean;
+  color: string;
+  onReady?: () => void;
+  pendulumParams: {
+    initialAngle: number;
+    initialSpeed: number;
+    timeStep: number;
+    pendulumType: PendulumType;
+  };
+}
+
+function Pendulum({ color, angle }: { color: string; angle: number }) {
   return (
     <div
       style={{
@@ -130,3 +188,9 @@ function startLoop(
 }
 
 type Data = { time: number; value: number }[];
+
+export const enum PendulumType {
+  ODE,
+  Approximation,
+  Default,
+}

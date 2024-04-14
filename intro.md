@@ -25,7 +25,7 @@ We obviously assume, that the string/rod/bar/whatever is there that connects the
 
 <an equation for force>
 
-What we know from physics, is that force is a derivative of {pęd} both on mass and speed. Here we obviously assume, that the mass is constant.
+What we know from physics, is that force is a derivative of momentum both on mass and speed. Here we obviously assume, that the mass is constant.
 
 <an equation for force with derivatives>
 

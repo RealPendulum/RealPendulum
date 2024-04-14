@@ -5,7 +5,7 @@ import { printEveryFrame } from "../app/refreshFrequency";
 import "../app/globals.css";
 import Link from "next/link";
 import Urls from "../urls";
-import { Pendulums } from "./pendulum";
+import { TwoPendulums } from "./pendulum";
 
 function DesktopNavLinks() {
   return (
@@ -73,7 +73,7 @@ export function Home() {
     >
       <DesktopNavLinks />
       <FpsCounter />
-      <Pendulums />
+      <TwoPendulums />
     </div>
   );
 }
