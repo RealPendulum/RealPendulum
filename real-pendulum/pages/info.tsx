@@ -79,7 +79,7 @@ function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
           {prevText}
         </Button>
       )}
-      {currentSlide <= Slides.length - 1 && (
+      {currentSlide < Slides.length - 1 && (
         <Button
           variant="outlined"
           color="primary"
@@ -176,8 +176,17 @@ function Slide3() {
         {texts.map((text, index) => (
           <div key={index}>{text}</div>
         ))}
-        <TwoPendulums />
-        <div>PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED</div>
+        <PendulumContainer
+          isWaitingToStart={false}
+          color="aquamarine"
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 2,
+            timeStep: 4,
+            pendulumType: PendulumType.Approximation,
+          }}
+        />
+        <div>PLACEHOLDER: APPROXIMATION WITHIN ITS LIMITS</div>
       </div>
     </>
   );
@@ -194,6 +203,28 @@ function Slide4() {
         {texts.map((text, index) => (
           <div key={index}>{text}</div>
         ))}
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <PendulumContainer
+            isWaitingToStart={false}
+            color="lightgreen"
+            pendulumParams={{
+              initialAngle: 0,
+              initialSpeed: 2,
+              timeStep: 4,
+              pendulumType: PendulumType.ODE,
+            }}
+          />
+          <PendulumContainer
+            isWaitingToStart={false}
+            color="aquamarine"
+            pendulumParams={{
+              initialAngle: 0,
+              initialSpeed: 2,
+              timeStep: 4,
+              pendulumType: PendulumType.Approximation,
+            }}
+          />
+        </div>
         <div>PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED</div>
       </div>
     </>
@@ -347,7 +378,28 @@ function Slide13() {
       {texts.map((text, index) => (
         <div key={index}>{text}</div>
       ))}
-      <TwoPendulums />
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <PendulumContainer
+          isWaitingToStart={false}
+          color="lightgreen"
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 5,
+            timeStep: 4,
+            pendulumType: PendulumType.ODE,
+          }}
+        />
+        <PendulumContainer
+          isWaitingToStart={false}
+          color="aquamarine"
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 5,
+            timeStep: 4,
+            pendulumType: PendulumType.Approximation,
+          }}
+        />
+      </div>
       <div>PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED</div>
     </div>
   );
