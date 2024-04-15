@@ -4,7 +4,7 @@ import { printEveryFrame } from "../app/refreshFrequency";
 import "../app/globals.css";
 import Link from "next/link";
 import Urls from "../urls";
-import { Pendulums } from "./pendulum";
+import { TwoPendulums } from "./pendulum";
 
 export function Home() {
   return (
@@ -12,7 +12,7 @@ export function Home() {
       <DesktopNavLinks />
       <FpsCounter />
       <div className="flex flex-row justify-center">
-        <Pendulums />
+        <TwoPendulums />
       </div>
     </div>
   );
@@ -21,9 +21,6 @@ export function Home() {
 function DesktopNavLinks() {
   return (
     <nav>
-      {/* <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-        Button
-      </button> */}
       <div className="flex flex-row justify-center p-3">
         {[
           ["Home", Urls.homeURL],

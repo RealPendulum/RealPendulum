@@ -1,142 +1,144 @@
-using System.Diagnostics;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.OdeSolvers;
 
 namespace RealPendulumApi;
 
-public class ODESolver
+public class OdeSolver
 {
-  public static ODEPoint[] Solve(Parameters parameters)
+  public static Solution Solve(Parameters parameters)
   {
-    return new ODESolver { Params = parameters }.SolveODE();
+    return new OdeSolver { Params = parameters }.SolveODE();
   }
 
-  private ODEPoint[] SolveODE()
+  private Solution SolveODE()
   {
-    Stopwatch stopwatch = Stopwatch.StartNew();
-
     var y0 = Vector<double>.Build.Dense(
       [Params.InitialAngle, Params.InitialSpeed]
     );
 
-    var start = 0;
-
-    var N = (int)(Params.Duration * 1000 / Params.TimeStep);
-
-    // var solution = RungeKutta.SecondOrder(
-    // y0,
-    // start,
-    // Params.Duration,
-    // N,
-    // Params.IsExact ? PendulumExact : PendulumApprox
-    // );
+    var timeStepInSeconds = Params.TimeStep / 1000;
 
     var solution = SecondOrder(
       y0,
-      Params.TimeStep / 1000,
+      timeStepInSeconds,
       Params.IsExact ? PendulumExact : PendulumApprox
     );
 
-    var timeStepInSeconds = Params.TimeStep / 1000;
-
-    var points = solution
-      .Select(
-        (y, i) => new ODEPoint { Time = i * timeStepInSeconds, Value = y[0] }
-      )
-      .ToArray();
-
-    stopwatch.Stop();
-    // Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
-
-    return points;
+    return solution;
   }
 
   private Parameters Params { get; set; } = new();
 
-  private Vector<double> PendulumExact(double t, Vector<double> y)
+  private Vector<double> PendulumExact(Vector<double> y)
   {
     return Vector<double>.Build.Dense(
       [y[1], -Params.Acceleration / Params.Length * Math.Sin(y[0])]
     );
   }
 
-  private Vector<double> PendulumApprox(double t, Vector<double> y)
+  private Vector<double> PendulumApprox(Vector<double> y)
   {
     return Vector<double>.Build.Dense(
       [y[1], -Params.Acceleration / Params.Length * y[0]]
     );
   }
 
-  // Taken from MathNet.Numerics.OdeSolvers.RungeKutta
-  public static Vector<double>[] SecondOrder(
+  /// <summary>
+  /// Taken from `MathNet.Numerics.OdeSolvers.RungeKutta`
+  /// </summary>
+  public static Solution SecondOrder(
     Vector<double> y0,
     double step,
-    // double start,
-    // double end,
-    // int N,
-    Func<double, Vector<double>, Vector<double>> f
+    Func<Vector<double>, Vector<double>> f
   )
   {
     int passes = 0;
-    double start = y0[0];
     const int MAGIC_NUMBER = 2048;
-    Vector<double>[] array = new Vector<double>[MAGIC_NUMBER];
+    var array = new Vector<double>[MAGIC_NUMBER];
     double current = 0;
     array[0] = y0;
     int length = 1;
-    for (; length < MAGIC_NUMBER && passes < 2; length++)
+    int loopStart = -1;
+    while (length < MAGIC_NUMBER && passes < 2)
     {
-      Vector<double> vector = f(current, y0);
-      Vector<double> vector2 = f(current, y0 + vector * step);
-      array[length] = y0 + step * 0.5 * (vector + vector2);
-      if (
-        (y0[0] < start && array[length][0] > start)
-        || (y0[0] > start && array[length][0] < start)
-      )
+      var vector = f(y0);
+      Vector<double> vector2 = f(y0 + vector * step);
+      var newY = y0 + step * 0.5 * (vector + vector2);
+      array[length] = newY;
+      if (y0[0] <= 0 && newY[0] > 0)
       {
         passes++;
+        if (loopStart == -1)
+        {
+          loopStart = length - 1;
+        }
       }
       current += step;
-      y0 = array[length];
+      y0 = newY;
+
+      length++;
     }
 
-    Console.WriteLine($"Length: {length}, Passes: {passes}");
-    return array.Take(length - 1).ToArray();
+    var points = array
+      .Take(length - 1)
+      .Select((y, i) => new OdePoint { Time = i * step, Value = y[0] })
+      .ToArray();
+
+    return new Solution { Points = points, LoopStart = loopStart };
   }
 }
 
 public class AnalyticSolver
 {
-  public static ODEPoint[] Solve(Parameters parameters)
+  public static Solution Solve(Parameters parameters)
   {
     return new AnalyticSolver(parameters).SolveAnalytic();
   }
 
-  private ODEPoint[] SolveAnalytic()
+  private Solution SolveAnalytic()
   {
-    Stopwatch stopwatch = Stopwatch.StartNew();
-
     Params.Duration = 2 * Math.PI / Omega;
 
-    var N = (int)(Params.Duration * 1000 / Params.TimeStep) + 1;
-
     var timeStepInSeconds = Params.TimeStep / 1000;
+    // var points = new ODEPoint[N]
+    //   .Select(
+    //     (_, i) =>
+    //       new ODEPoint
+    //       {
+    //         Time = i * timeStepInSeconds,
+    //         Value = PendulumApproxSolved(i * timeStepInSeconds)
+    //       }
+    //   )
+    //   .ToArray();
 
-    var points = new ODEPoint[N]
-      .Select(
-        (_, i) =>
-          new ODEPoint
-          {
-            Time = i * timeStepInSeconds,
-            Value = PendulumApproxSolved(i * timeStepInSeconds)
-          }
-      )
-      .ToArray();
+    var points = new List<OdePoint>
+    {
+      new() { Time = 0, Value = PendulumApproxSolved(0) }
+    };
 
-    stopwatch.Stop();
-    // Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
+    int passes = 0;
+    int loopStart = -1;
+    const int MAGIC_NUMBER = 2048;
+    int length = 1;
 
-    return points;
+    while (length < MAGIC_NUMBER && passes < 2)
+    {
+      var t = length * timeStepInSeconds;
+      var y = PendulumApproxSolved(t);
+      points.Add(new OdePoint { Time = t, Value = y });
+
+      if (points[length - 1].Value <= 0 && points[length].Value > 0)
+      {
+        passes++;
+        if (loopStart == -1)
+        {
+          loopStart = length - 1;
+        }
+      }
+
+      length++;
+    }
+
+    return new Solution { Points = [.. points], LoopStart = loopStart };
   }
 
   private double PendulumApproxSolved(double t)
@@ -144,7 +146,7 @@ public class AnalyticSolver
     return Amplitude * Math.Sin(Omega * t + PhaseShift);
   }
 
-  private Parameters Params { get; set; } = new();
+  private Parameters Params { get; set; }
 
   private double Omega { get; set; }
 
@@ -185,7 +187,13 @@ public record Parameters
   public bool IsExact { get; set; }
 }
 
-public record ODEPoint()
+public record Solution
+{
+  public OdePoint[] Points { get; set; } = [];
+  public int LoopStart { get; set; } = -1;
+}
+
+public record OdePoint()
 {
   public double Time { get; init; }
   public double Value { get; init; }
