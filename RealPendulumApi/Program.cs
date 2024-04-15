@@ -42,7 +42,7 @@ app.MapGet(
       bool isExact = true
     ) =>
     {
-      var points = ODESolver.Solve(
+      var solution = OdeSolver.Solve(
         new Parameters
         {
           Duration = duration,
@@ -55,40 +55,41 @@ app.MapGet(
         }
       );
 
-      return points;
+      return solution;
     }
   )
-  .WithName("GetPendulumSolution")
+  .WithName("Exact Pendulum Solution")
   .WithOpenApi();
 
 app.MapGet(
-  "/pendulum/approx",
-  (
-    double duration = 10,
-    double timeStep = 10,
-    double acceleration = 9.81,
-    double length = 1,
-    double initialAngle = 0,
-    double initialSpeed = 0.1
-  ) =>
-  {
-    Console.WriteLine("Approximation");
-    var points = AnalyticSolver.Solve(
-      new Parameters
-      {
-        Duration = duration,
-        TimeStep = timeStep,
-        Acceleration = acceleration,
-        Length = length,
-        InitialAngle = initialAngle,
-        InitialSpeed = initialSpeed,
-        IsExact = false
-      }
-    );
+    "/pendulum/approx",
+    (
+      double duration = 10,
+      double timeStep = 10,
+      double acceleration = 9.81,
+      double length = 1,
+      double initialAngle = 0,
+      double initialSpeed = 0.1
+    ) =>
+    {
+      var solution = AnalyticSolver.Solve(
+        new Parameters
+        {
+          Duration = duration,
+          TimeStep = timeStep,
+          Acceleration = acceleration,
+          Length = length,
+          InitialAngle = initialAngle,
+          InitialSpeed = initialSpeed,
+          IsExact = false
+        }
+      );
 
-    return points;
-  }
-);
+      return solution;
+    }
+  )
+  .WithName("Approximate Pendulum Solution")
+  .WithOpenApi();
 
 app.UseCors("AllowAnyOrigin");
 

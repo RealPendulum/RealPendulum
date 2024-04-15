@@ -54,7 +54,7 @@ export function PendulumContainer({
   pendulumParams: { initialAngle, initialSpeed, timeStep, pendulumType },
 }: PendulumContainerProps) {
   const [angle, setAngle] = useState(0);
-  const data = useRef<Data>([]);
+  const data = useRef<Data>({ points: [], loopStart: 0 });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
 
@@ -114,46 +114,34 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
   return (
     <div
       style={{
-        width: 720,
-        height: 720,
-        position: "relative",
-        borderWidth: "4px",
-        borderColor: "white",
-        borderRadius: "20%",
-        margin: "10px",
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        transform: `rotate(${angle}rad)`,
       }}
     >
       <div
         style={{
           position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: `rotate(${angle}rad)`,
+          width: "4px",
+          height: "300px",
+          backgroundColor: "black",
+          borderRadius: "2px",
         }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            width: "4px",
-            height: "300px",
-            backgroundColor: "black",
-            borderRadius: "2px",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            backgroundColor: color,
-            left: "-23px",
-            top: "295px",
-            borderWidth: "4px",
-            borderColor: "black",
-          }}
-        />
-      </div>
+      />
+      <div
+        style={{
+          position: "absolute",
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          backgroundColor: color,
+          left: "-23px",
+          top: "295px",
+          borderWidth: "4px",
+          borderColor: "black",
+        }}
+      />
     </div>
   );
 }
@@ -164,7 +152,7 @@ function startLoop(
 ): { job: number } {
   let startTimestamp = performance.now();
   let frame = 0;
-  const dataLength = data.length;
+  const dataLength = data.points.length;
   let job = { job: requestAnimationFrame(loop) };
   return job;
 
@@ -172,22 +160,28 @@ function startLoop(
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
 
-    while (data[frame].time <= userTime) {
+    while (data.points[frame].time <= userTime) {
       frame = frame + 1;
       if (frame >= dataLength) {
-        frame = 0;
+        frame = data.loopStart;
         startTimestamp = timestamp;
         break;
       }
     }
 
-    const angle = data[frame].value;
+    const angle = data.points[frame].value;
     setAngle(angle);
     job.job = requestAnimationFrame(loop);
   }
 }
 
-type Data = { time: number; value: number }[];
+type Data = {
+  points: {
+    time: number;
+    value: number;
+  }[];
+  loopStart: number;
+};
 
 export const enum PendulumType {
   ODE,
