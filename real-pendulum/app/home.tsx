@@ -6,13 +6,25 @@ import Link from "next/link";
 import Urls from "../urls";
 import { Pendulums } from "./pendulum";
 
+export function Home() {
+  return (
+    <div className="w-100vh h-100vh bg-gray-200">
+      <DesktopNavLinks />
+      <FpsCounter />
+      <div className="flex flex-row justify-center">
+        <Pendulums />
+      </div>
+    </div>
+  );
+}
+
 function DesktopNavLinks() {
   return (
     <nav>
       {/* <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
         Button
       </button> */}
-      <div className="flex flex-row justify-center">
+      <div className="flex flex-row justify-center p-3">
         {[
           ["Home", Urls.homeURL],
           ["Info", Urls.infoURL],
@@ -23,43 +35,13 @@ function DesktopNavLinks() {
           <Link
             href={url}
             key={title}
-            className="m-3 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600"
+            className="m-3 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-800 transition duration-200 hover:scale-125"
           >
             {title}
           </Link>
         ))}
       </div>
     </nav>
-  );
-}
-
-export function Home() {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "0",
-        left: "0",
-        width: "100%",
-        height: "100%",
-        zIndex: -1,
-        backgroundColor: "#e5ddf0",
-        // justifyContent: "center",
-        // alignContent: "center",
-      }}
-    >
-      <DesktopNavLinks />
-      <FpsCounter />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          margin: "10px",
-        }}
-      >
-        <Pendulums />
-      </div>
-    </div>
   );
 }
 
@@ -74,19 +56,7 @@ function FpsCounter() {
   }, []);
 
   return (
-    <div
-      style={{
-        // position: "relative",
-        // top: "0",
-        // left: "50%",
-        width: "80px",
-        height: "80px",
-        backgroundColor: "blue",
-        color: "white",
-        fontSize: "30px",
-        // alignContent: "center",
-      }}
-    >
+    <div className="w-12 h-12 bg-blue-600 text-white text-3xl">
       {fpsValue.toFixed(0)}
     </div>
   );
