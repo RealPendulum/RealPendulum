@@ -1,80 +1,44 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { printEveryFrame } from "../app/refreshFrequency";
 import "../app/globals.css";
 import Link from "next/link";
 import Urls from "../urls";
 import { TwoPendulums } from "./pendulum";
 
-function DesktopNavLinks() {
+export function Home() {
   return (
-    <nav>
-      {/* <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-        Button
-      </button> */}
-
-      <div className="flex flex-row justify-center space-x-6">
-        <div>
-          <Link
-            href="/"
-            className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-          >
-            Home
-          </Link>
-        </div>
-
-        <Link
-          href={Urls.infoURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Informacje
-        </Link>
-
-        <Link
-          href={Urls.gameURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Gra
-        </Link>
-
-        <Link
-          href={Urls.examplesURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Przykłady
-        </Link>
-
-        <Link
-          href={Urls.contactURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Kontakt
-        </Link>
+    <div className="w-100vh h-100vh bg-gray-200">
+      <DesktopNavLinks />
+      <FpsCounter />
+      <div className="flex flex-row justify-center">
+        <TwoPendulums />
       </div>
-    </nav>
+    </div>
   );
 }
 
-export function Home() {
+function DesktopNavLinks() {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "0",
-        left: "0",
-        width: "100%",
-        height: "100%",
-        zIndex: -1,
-        backgroundColor: "#e5ddf0",
-        // justifyContent: "center",
-        // alignContent: "center",
-      }}
-    >
-      <DesktopNavLinks />
-      <FpsCounter />
-      <TwoPendulums />
-    </div>
+    <nav>
+      <div className="flex flex-row justify-center p-3">
+        {[
+          ["Home", Urls.homeURL],
+          ["Info", Urls.infoURL],
+          ["Game", Urls.gameURL],
+          ["Examples", Urls.examplesURL],
+          ["Contact", Urls.contactURL],
+        ].map(([title, url]) => (
+          <Link
+            href={url}
+            key={title}
+            className="m-3 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-800 transition duration-200 hover:scale-125"
+          >
+            {title}
+          </Link>
+        ))}
+      </div>
+    </nav>
   );
 }
 
@@ -89,19 +53,7 @@ function FpsCounter() {
   }, []);
 
   return (
-    <div
-      style={{
-        // position: "relative",
-        // top: "0",
-        // left: "50%",
-        width: "20%",
-        height: "20%",
-        backgroundColor: "blue",
-        color: "white",
-        fontSize: "30px",
-        // alignContent: "center",
-      }}
-    >
+    <div className="w-12 h-12 bg-blue-600 text-white text-3xl">
       {fpsValue.toFixed(0)}
     </div>
   );
