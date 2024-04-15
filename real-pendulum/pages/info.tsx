@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { Button } from "@mui/material";
 import { PendulumType, PendulumContainer, TwoPendulums } from "@/app/pendulum";
+import "../app/globals.css";
 
 export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { Slide } = Slides[currentSlide];
   return (
-    <>
-      <Slide />
-      <div />
-      <NavigationPanel
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-      />
-    </>
+    <div className="min-h-screen bg-gray-100">
+      <div className="container mx-auto">
+        <Slide />
+        <NavigationPanel
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -95,12 +97,10 @@ function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
 function Slide0() {
   const texts = ["Hi there!", "Let's talk pendulums.", "Are you ready?"];
   return (
-    <div style={{}}>
-      <div style={{ textAlign: "center", height: "30vh" }}>
-        {texts.map((text, index) => (
-          <div key={index}>{text}</div>
-        ))}
-      </div>
+    <div className="text-center text-black">
+      {texts.map((text, index) => (
+        <div key={index}>{text}</div>
+      ))}
     </div>
   );
 }
@@ -112,11 +112,11 @@ function Slide1() {
     "Lately to my mind came the fact, that we rarely see pendulums in our lives.",
   ];
   return (
-    <>
-      <div style={{ textAlign: "center", height: "30vh" }}>
-        {texts.map((text, index) => (
-          <div key={index}>{text}</div>
-        ))}
+    <div className="flex flex-col items-center text-center text-black">
+      {texts.map((text, index) => (
+        <div key={index}>{text}</div>
+      ))}
+      <div className="h-80">
         <PendulumContainer
           isWaitingToStart={false}
           color="lightgreen"
@@ -127,9 +127,9 @@ function Slide1() {
             pendulumType: PendulumType.ODE,
           }}
         />
-        <div>PLACEHOLDER: SMALL PENDULUM CLOCK HERE</div>
       </div>
-    </>
+      <div>PLACEHOLDER: SMALL PENDULUM CLOCK HERE</div>
+    </div>
   );
 }
 

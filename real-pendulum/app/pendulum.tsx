@@ -20,29 +20,33 @@ export function TwoPendulums() {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
-      <PendulumContainer
-        isWaitingToStart={isWaitingToStart}
-        color="lightgreen"
-        onReady={startAnimation}
-        pendulumParams={{
-          initialAngle: 0,
-          initialSpeed: 2,
-          timeStep: 4,
-          pendulumType: PendulumType.ODE,
-        }}
-      />
-      <PendulumContainer
-        isWaitingToStart={isWaitingToStart}
-        color="aquamarine"
-        onReady={startAnimation}
-        pendulumParams={{
-          initialAngle: 0,
-          initialSpeed: 2,
-          timeStep: 4,
-          pendulumType: PendulumType.Approximation,
-        }}
-      />
+    <div className="w-80 h-80">
+      <div className="absolute left-1/2">
+        <PendulumContainer
+          isWaitingToStart={isWaitingToStart}
+          color="lightgreen"
+          onReady={startAnimation}
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 2,
+            timeStep: 4,
+            pendulumType: PendulumType.ODE,
+          }}
+        />
+      </div>
+      <div className="absolute left-1/2">
+        <PendulumContainer
+          isWaitingToStart={isWaitingToStart}
+          color="aquamarine"
+          onReady={startAnimation}
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 2,
+            timeStep: 4,
+            pendulumType: PendulumType.Approximation,
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -91,11 +95,7 @@ export function PendulumContainer({
     };
   }, [isWaitingToStart, isReady]);
 
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
-      <Pendulum color={color} angle={angle} />
-    </div>
-  );
+  return <Pendulum color={color} angle={angle} />;
 }
 
 interface PendulumContainerProps {
@@ -115,14 +115,12 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
     <div
       style={{
         position: "absolute",
-        left: "50%",
-        top: "50%",
         transform: `rotate(${angle}rad)`,
+        transformOrigin: "top left",
       }}
     >
       <div
         style={{
-          position: "absolute",
           width: "4px",
           height: "300px",
           backgroundColor: "black",
@@ -131,7 +129,6 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
       />
       <div
         style={{
-          position: "absolute",
           width: "50px",
           height: "50px",
           borderRadius: "50%",
@@ -140,6 +137,7 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
           top: "295px",
           borderWidth: "4px",
           borderColor: "black",
+          transform: "translate(-50%, -50%)",
         }}
       />
     </div>
