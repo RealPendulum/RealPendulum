@@ -14,42 +14,40 @@ function DesktopNavLinks() {
         Button
       </button> */}
 
-      <div className="flex flex-row justify-center space-x-6">
-        <div>
-          <Link
-            href="/"
-            className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-          >
-            Home
-          </Link>
-        </div>
+      <div className="flex flex-row justify-center">
+        <Link
+          href="/"
+          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
+        >
+          Home
+        </Link>
 
         <Link
           href={Urls.infoURL}
           className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
         >
-          Informacje
+          Info
         </Link>
 
         <Link
           href={Urls.gameURL}
           className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
         >
-          Gra
+          Game
         </Link>
 
         <Link
           href={Urls.examplesURL}
           className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
         >
-          Przykłady
+          Examples
         </Link>
 
         <Link
           href={Urls.contactURL}
           className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
         >
-          Kontakt
+          Contact
         </Link>
       </div>
     </nav>
@@ -73,7 +71,15 @@ export function Home() {
     >
       <DesktopNavLinks />
       <FpsCounter />
-      <Pendulums />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          margin: "10px",
+        }}
+      >
+        <Pendulums />
+      </div>
     </div>
   );
 }
