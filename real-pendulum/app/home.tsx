@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { printEveryFrame } from "../app/refreshFrequency";
 import "../app/globals.css";
 import Link from "next/link";
@@ -13,42 +12,22 @@ function DesktopNavLinks() {
       {/* <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
         Button
       </button> */}
-
       <div className="flex flex-row justify-center">
-        <Link
-          href="/"
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Home
-        </Link>
-
-        <Link
-          href={Urls.infoURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Info
-        </Link>
-
-        <Link
-          href={Urls.gameURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Game
-        </Link>
-
-        <Link
-          href={Urls.examplesURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Examples
-        </Link>
-
-        <Link
-          href={Urls.contactURL}
-          className="m-3 flex h-20 w-20 items-center justify-center rounded-full bg-blue-600"
-        >
-          Contact
-        </Link>
+        {[
+          ["Home", Urls.homeURL],
+          ["Info", Urls.infoURL],
+          ["Game", Urls.gameURL],
+          ["Examples", Urls.examplesURL],
+          ["Contact", Urls.contactURL],
+        ].map(([title, url]) => (
+          <Link
+            href={url}
+            key={title}
+            className="m-3 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600"
+          >
+            {title}
+          </Link>
+        ))}
       </div>
     </nav>
   );
@@ -100,8 +79,8 @@ function FpsCounter() {
         // position: "relative",
         // top: "0",
         // left: "50%",
-        width: "20%",
-        height: "20%",
+        width: "80px",
+        height: "80px",
         backgroundColor: "blue",
         color: "white",
         fontSize: "30px",
