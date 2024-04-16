@@ -20,29 +20,33 @@ export function TwoPendulums() {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
-      <PendulumContainer
-        isWaitingToStart={isWaitingToStart}
-        color="lightgreen"
-        onReady={startAnimation}
-        pendulumParams={{
-          initialAngle: 0,
-          initialSpeed: 2,
-          timeStep: 4,
-          pendulumType: PendulumType.ODE,
-        }}
-      />
-      <PendulumContainer
-        isWaitingToStart={isWaitingToStart}
-        color="aquamarine"
-        onReady={startAnimation}
-        pendulumParams={{
-          initialAngle: 0,
-          initialSpeed: 2,
-          timeStep: 4,
-          pendulumType: PendulumType.Approximation,
-        }}
-      />
+    <div className="w-80 h-80">
+      <div className="absolute left-1/2">
+        <PendulumContainer
+          isWaitingToStart={isWaitingToStart}
+          color="lightgreen"
+          onReady={startAnimation}
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 2,
+            timeStep: 4,
+            pendulumType: PendulumType.ODE,
+          }}
+        />
+      </div>
+      <div className="absolute left-1/2">
+        <PendulumContainer
+          isWaitingToStart={isWaitingToStart}
+          color="aquamarine"
+          onReady={startAnimation}
+          pendulumParams={{
+            initialAngle: 0,
+            initialSpeed: 2,
+            timeStep: 4,
+            pendulumType: PendulumType.Approximation,
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -53,7 +57,7 @@ export function PendulumContainer({
   onReady,
   pendulumParams: { initialAngle, initialSpeed, timeStep, pendulumType },
 }: PendulumContainerProps) {
-  const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState(initialAngle);
   const data = useRef<Data>({ points: [], loopStart: 0 });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
@@ -91,11 +95,7 @@ export function PendulumContainer({
     };
   }, [isWaitingToStart, isReady]);
 
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", margin: "10px" }}>
-      <Pendulum color={color} angle={angle} />
-    </div>
-  );
+  return <Pendulum color={color} angle={angle} />;
 }
 
 interface PendulumContainerProps {
@@ -115,23 +115,33 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
     <div
       style={{
         position: "absolute",
-        left: "50%",
-        top: "50%",
         transform: `rotate(${angle}rad)`,
+        transformOrigin: "top left",
       }}
     >
       <div
         style={{
           position: "absolute",
-          width: "4px",
-          height: "300px",
-          backgroundColor: "black",
-          borderRadius: "2px",
+          width: "20px",
+          height: "20px",
+          borderRadius: "50%",
+          backgroundColor: color,
+          borderColor: "black",
+          borderWidth: "4px",
+          transform: `translate(-50%, -50%)`,
+          zIndex: 1,
         }}
       />
       <div
         style={{
-          position: "absolute",
+          width: "4px",
+          height: "300px",
+          backgroundColor: "black",
+          transform: `translate(-50%, 0)`,
+        }}
+      />
+      <div
+        style={{
           width: "50px",
           height: "50px",
           borderRadius: "50%",
@@ -140,6 +150,7 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
           top: "295px",
           borderWidth: "4px",
           borderColor: "black",
+          transform: "translate(-50%, -50%)",
         }}
       />
     </div>
@@ -159,13 +170,23 @@ function startLoop(
   function loop() {
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
+    const timeAtLoopStart = data.points[data.loopStart].time;
 
-    while (data.points[frame].time <= userTime) {
-      frame = frame + 1;
-      if (frame >= dataLength) {
-        frame = data.loopStart;
+    if (frame >= data.loopStart) {
+      while (data.points[frame].time - timeAtLoopStart <= userTime) {
+        frame = frame + 1;
+        if (frame >= dataLength) {
+          frame = data.loopStart;
+          startTimestamp = timestamp;
+          break;
+        }
+      }
+    } else {
+      while (data.points[frame].time <= userTime) {
+        frame = frame + 1;
+      }
+      if (frame >= data.loopStart) {
         startTimestamp = timestamp;
-        break;
       }
     }
 

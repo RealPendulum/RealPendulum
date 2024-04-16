@@ -8,11 +8,13 @@ import { TwoPendulums } from "./pendulum";
 
 export function Home() {
   return (
-    <div className="w-100vh h-100vh bg-gray-200">
-      <DesktopNavLinks />
-      <FpsCounter />
-      <div className="flex flex-row justify-center">
-        <TwoPendulums />
+    <div className="min-h-screen bg-gray-100">
+      <div className="container mx-auto">
+        <DesktopNavLinks />
+        <FpsCounter />
+        <div className="flex justify-center">
+          <TwoPendulums />
+        </div>
       </div>
     </div>
   );
