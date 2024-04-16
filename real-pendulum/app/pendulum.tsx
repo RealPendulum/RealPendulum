@@ -57,7 +57,7 @@ export function PendulumContainer({
   onReady,
   pendulumParams: { initialAngle, initialSpeed, timeStep, pendulumType },
 }: PendulumContainerProps) {
-  const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState(initialAngle);
   const data = useRef<Data>({ points: [], loopStart: 0 });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
@@ -121,10 +121,23 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
     >
       <div
         style={{
+          position: "absolute",
+          width: "20px",
+          height: "20px",
+          borderRadius: "50%",
+          backgroundColor: color,
+          borderColor: "black",
+          borderWidth: "4px",
+          transform: `translate(-50%, -50%)`,
+          zIndex: 1,
+        }}
+      />
+      <div
+        style={{
           width: "4px",
           height: "300px",
           backgroundColor: "black",
-          borderRadius: "2px",
+          transform: `translate(-50%, 0)`,
         }}
       />
       <div
@@ -157,13 +170,23 @@ function startLoop(
   function loop() {
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
+    const timeAtLoopStart = data.points[data.loopStart].time;
 
-    while (data.points[frame].time <= userTime) {
-      frame = frame + 1;
-      if (frame >= dataLength) {
-        frame = data.loopStart;
+    if (frame >= data.loopStart) {
+      while (data.points[frame].time - timeAtLoopStart <= userTime) {
+        frame = frame + 1;
+        if (frame >= dataLength) {
+          frame = data.loopStart;
+          startTimestamp = timestamp;
+          break;
+        }
+      }
+    } else {
+      while (data.points[frame].time <= userTime) {
+        frame = frame + 1;
+      }
+      if (frame >= data.loopStart) {
         startTimestamp = timestamp;
-        break;
       }
     }
 

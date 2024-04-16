@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@mui/material";
-import { PendulumType, PendulumContainer, TwoPendulums } from "@/app/pendulum";
+import { PendulumType, PendulumContainer } from "@/app/pendulum";
 import "../app/globals.css";
+import Link from "next/link";
 
 export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -9,7 +10,15 @@ export default function Info() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto">
-        <Slide />
+        <div className="flex flex-col h-75vh justify-between p-5">
+          <div>
+            <Slide />
+          </div>
+          <NavigationArrows
+            currentSlide={currentSlide}
+            setCurrentSlide={setCurrentSlide}
+          />
+        </div>
         <NavigationPanel
           currentSlide={currentSlide}
           setCurrentSlide={setCurrentSlide}
@@ -39,30 +48,34 @@ const Slides: Slide[] = [
 
 function NavigationPanel({ currentSlide, setCurrentSlide }: NavigationProps) {
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      <NavigationArrows
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-      />
-      {Slides.map((_slide, index) =>
-        index <= currentSlide ? (
-          <Button
-            key={index}
-            color="primary"
-            onClick={() => setCurrentSlide(index)}
-          >
-            🟡
-          </Button>
-        ) : (
-          <Button
-            key={index}
-            color="primary"
-            onClick={() => setCurrentSlide(index)}
-          >
-            ⚪
-          </Button>
-        )
-      )}
+    <div className="flex flex-col items-center">
+      <div className="flex flex-row items-center justify-center">
+        {Slides.map((_slide, index) =>
+          index <= currentSlide ? (
+            <Button
+              key={index}
+              color="primary"
+              onClick={() => setCurrentSlide(index)}
+            >
+              🟡
+            </Button>
+          ) : (
+            <Button
+              key={index}
+              color="primary"
+              onClick={() => setCurrentSlide(index)}
+            >
+              ⚪
+            </Button>
+          )
+        )}
+      </div>
+      <Link
+        href={"/"}
+        className="m-3 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-800 transition duration-200 hover:scale-125"
+      >
+        {"Go back"}
+      </Link>
     </div>
   );
 }
@@ -71,7 +84,7 @@ function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
   const prevText = "⬅";
   const nextText = Slides[currentSlide].nextText ?? "➡";
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
+    <div className="text-center">
       {currentSlide >= 1 && (
         <Button
           variant="outlined"
@@ -97,11 +110,9 @@ function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
 function Slide0() {
   const texts = ["Hi there!", "Let's talk pendulums.", "Are you ready?"];
   return (
-    <div className="text-center text-black">
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+    </SlideTemplate>
   );
 }
 
@@ -112,24 +123,21 @@ function Slide1() {
     "Lately to my mind came the fact, that we rarely see pendulums in our lives.",
   ];
   return (
-    <div className="flex flex-col items-center text-center text-black">
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div className="h-80">
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: SMALL PENDULUM CLOCK HERE">
         <PendulumContainer
           isWaitingToStart={false}
           color="lightgreen"
           pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
+            initialAngle: 0.5,
+            initialSpeed: 0,
             timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
-      </div>
-      <div>PLACEHOLDER: SMALL PENDULUM CLOCK HERE</div>
-    </div>
+      </Figure>
+    </SlideTemplate>
   );
 }
 
@@ -141,24 +149,21 @@ function Slide2() {
     'But who looks at the swing with a thought of its\' "pendulumness"?',
   ];
   return (
-    <>
-      <div style={{ textAlign: "center", height: "30vh" }}>
-        {texts.map((text, index) => (
-          <div key={index}>{text}</div>
-        ))}
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM">
         <PendulumContainer
           isWaitingToStart={false}
-          color="aquamarine"
+          color="orange"
           pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 10,
+            initialAngle: 0.5 * Math.PI,
+            initialSpeed: 0,
             timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
-        <div>PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM</div>
-      </div>
-    </>
+      </Figure>
+    </SlideTemplate>
   );
 }
 
@@ -171,24 +176,21 @@ function Slide3() {
     "Or so I would like to verify with this webpage.",
   ];
   return (
-    <>
-      <div style={{ textAlign: "center", height: "30vh" }}>
-        {texts.map((text, index) => (
-          <div key={index}>{text}</div>
-        ))}
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: APPROXIMATION WITHIN ITS LIMITS">
         <PendulumContainer
           isWaitingToStart={false}
           color="aquamarine"
           pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
+            initialAngle: 0.2,
+            initialSpeed: 0,
             timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
-        <div>PLACEHOLDER: APPROXIMATION WITHIN ITS LIMITS</div>
-      </div>
-    </>
+      </Figure>
+    </SlideTemplate>
   );
 }
 
@@ -198,36 +200,37 @@ function Slide4() {
     "Which one is real?",
   ];
   return (
-    <>
-      <div style={{ textAlign: "center", height: "30vh" }}>
-        {texts.map((text, index) => (
-          <div key={index}>{text}</div>
-        ))}
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <PendulumContainer
-            isWaitingToStart={false}
-            color="lightgreen"
-            pendulumParams={{
-              initialAngle: 0,
-              initialSpeed: 2,
-              timeStep: 4,
-              pendulumType: PendulumType.ODE,
-            }}
-          />
-          <PendulumContainer
-            isWaitingToStart={false}
-            color="aquamarine"
-            pendulumParams={{
-              initialAngle: 0,
-              initialSpeed: 2,
-              timeStep: 4,
-              pendulumType: PendulumType.Approximation,
-            }}
-          />
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED">
+        <div className="flex flex-row justify-between w-16">
+          <div>
+            <PendulumContainer
+              isWaitingToStart={false}
+              color="pink"
+              pendulumParams={{
+                initialAngle: 0.2,
+                initialSpeed: 0,
+                timeStep: 4,
+                pendulumType: PendulumType.ODE,
+              }}
+            />
+          </div>
+          <div>
+            <PendulumContainer
+              isWaitingToStart={false}
+              color="yellow"
+              pendulumParams={{
+                initialAngle: 0.2,
+                initialSpeed: 0,
+                timeStep: 4,
+                pendulumType: PendulumType.Approximation,
+              }}
+            />
+          </div>
         </div>
-        <div>PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED</div>
-      </div>
-    </>
+      </Figure>
+    </SlideTemplate>
   );
 }
 
@@ -242,12 +245,10 @@ function Slide5() {
     "Let's look at this pretty figure of a pendulum.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: FIGURE OF A PENDULUM</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: FIGURE OF A PENDULUM" />
+    </SlideTemplate>
   );
 }
 
@@ -258,12 +259,10 @@ function Slide6() {
     "Therefore we get a simple equation for the outcome force that is applied to the weight.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: AN EQUATION FOR FORCE</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: AN EQUATION FOR FORCE" />
+    </SlideTemplate>
   );
 }
 
@@ -273,12 +272,10 @@ function Slide7() {
     "Here we obviously assume, that the mass is constant.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: AN EQUATION FOR FORCE WITH DERIVATIVES</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: AN EQUATION FOR FORCE WITH DERIVATIVES" />
+    </SlideTemplate>
   );
 }
 
@@ -288,15 +285,10 @@ function Slide8() {
     "Then, it won't be any other discovery if we link speed to position.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>
-        PLACEHOLDER: EN EQUATION FOR FORCE WITH SECOND DERIVATIVE TO GET
-        LOCATION
-      </div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: EN EQUATION FOR FORCE WITH SECOND DERIVATIVE TO GET LOCATION" />
+    </SlideTemplate>
   );
 }
 
@@ -311,11 +303,10 @@ function Slide9() {
     "There are two ways.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: CROSSROADS" />
+    </SlideTemplate>
   );
 }
 
@@ -328,12 +319,10 @@ function Slide10() {
     "(Those who know a bit of maths know that it's simple Taylor's expansion).",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: TABLE COMPARING SINX AND X</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: TABLE COMPARING SINX AND X" />
+    </SlideTemplate>
   );
 }
 
@@ -344,12 +333,10 @@ function Slide11() {
     "Solution is as goes:",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: SOLUTION</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: SOLUTION" />
+    </SlideTemplate>
   );
 }
 
@@ -359,12 +346,10 @@ function Slide12() {
     "To be honest, I don't know how to compute the exponent, but my calculator is pretty good at it!",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div>PLACEHOLDER: CALCULATOR</div>
-    </div>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: CALCULATOR" />
+    </SlideTemplate>
   );
 }
 
@@ -374,17 +359,15 @@ function Slide13() {
     "Could you guess which pendulum is true now?",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
-      {texts.map((text, index) => (
-        <div key={index}>{text}</div>
-      ))}
-      <div style={{ display: "flex", flexDirection: "row" }}>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+      <Figure text="PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED">
         <PendulumContainer
           isWaitingToStart={false}
           color="lightgreen"
           pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 5,
+            initialAngle: 0.45 * Math.PI,
+            initialSpeed: 0,
             timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
@@ -393,15 +376,14 @@ function Slide13() {
           isWaitingToStart={false}
           color="aquamarine"
           pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 5,
+            initialAngle: 0.45 * Math.PI,
+            initialSpeed: 0,
             timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
-      </div>
-      <div>PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED</div>
-    </div>
+      </Figure>
+    </SlideTemplate>
   );
 }
 
@@ -413,7 +395,32 @@ function Slide14() {
     "Please let me confirm that, playing <the game>.",
   ];
   return (
-    <div style={{ textAlign: "center", height: "30vh" }}>
+    <SlideTemplate>
+      <TextFromArray texts={texts} />
+    </SlideTemplate>
+  );
+}
+
+function SlideTemplate({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center text-center text-black">
+      {children}
+    </div>
+  );
+}
+
+function Figure({ children, text }: { children?: ReactNode; text?: string }) {
+  return (
+    <>
+      <div className="h-80 m-4">{children}</div>
+      <div>{text}</div>
+    </>
+  );
+}
+
+function TextFromArray({ texts }: { texts: string[] }) {
+  return (
+    <div className="text-center text-black">
       {texts.map((text, index) => (
         <div key={index}>{text}</div>
       ))}
