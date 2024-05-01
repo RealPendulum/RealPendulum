@@ -1,5 +1,5 @@
 const baseURL = "http://localhost:3000/";
-const homeURL = "";
+const homeURL = "/";
 const infoURL = "info/";
 const gameURL = "game/";
 const examplesURL = "examples/";

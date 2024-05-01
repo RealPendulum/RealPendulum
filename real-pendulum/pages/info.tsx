@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { Button } from "@mui/material";
 import { PendulumType, PendulumContainer } from "@/app/pendulum";
-import "../app/globals.css";
+import "@/app/globals.css";
 import Link from "next/link";
+import NavigationBar from "@/app/navigation";
+import Urls from "@/urls";
 
 export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -10,6 +12,7 @@ export default function Info() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto">
+        <NavigationBar currentSiteUrl={Urls.infoURL} />
         <div className="flex flex-col h-75vh justify-between p-5">
           <div>
             <Slide />
