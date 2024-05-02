@@ -69,7 +69,10 @@ export function PendulumContainer({
         ? "ode"
         : pendulumType == PendulumType.Approximation
         ? "approx"
+        : pendulumType == PendulumType.Random
+        ? "random"
         : "ode";
+    console.log(endpoint);
     const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
     axios
       .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
@@ -208,4 +211,5 @@ export const enum PendulumType {
   ODE,
   Approximation,
   Default,
+  Random,
 }

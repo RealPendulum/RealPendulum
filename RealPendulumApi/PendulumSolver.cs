@@ -80,7 +80,7 @@ public class OdeSolver
 
     var points = array
       .Take(length - 1)
-      .Select((y, i) => new OdePoint { Time = i * step, Value = y[0] })
+      .Select((y, i) => new Location { Time = i * step, Value = y[0] })
       .ToArray();
 
     return new Solution { Points = points, LoopStart = loopStart };
@@ -99,18 +99,8 @@ public class AnalyticSolver
     Params.Duration = 2 * Math.PI / Omega;
 
     var timeStepInSeconds = Params.TimeStep / 1000;
-    // var points = new ODEPoint[N]
-    //   .Select(
-    //     (_, i) =>
-    //       new ODEPoint
-    //       {
-    //         Time = i * timeStepInSeconds,
-    //         Value = PendulumApproxSolved(i * timeStepInSeconds)
-    //       }
-    //   )
-    //   .ToArray();
 
-    var points = new List<OdePoint>
+    var points = new List<Location>
     {
       new() { Time = 0, Value = PendulumApproxSolved(0) }
     };
@@ -124,7 +114,7 @@ public class AnalyticSolver
     {
       var t = length * timeStepInSeconds;
       var y = PendulumApproxSolved(t);
-      points.Add(new OdePoint { Time = t, Value = y });
+      points.Add(new Location { Time = t, Value = y });
 
       if (points[length - 1].Value <= 0 && points[length].Value > 0)
       {
@@ -176,6 +166,21 @@ public class AnalyticSolver
   }
 }
 
+public class RandomSolver
+{
+  public static Solution Solve(Parameters parameters)
+  {
+    if (parameters.IsExact)
+    {
+      return OdeSolver.Solve(parameters);
+    }
+    else
+    {
+      return AnalyticSolver.Solve(parameters);
+    }
+  }
+}
+
 public record Parameters
 {
   public double Duration { get; set; }
@@ -189,11 +194,11 @@ public record Parameters
 
 public record Solution
 {
-  public OdePoint[] Points { get; set; } = [];
+  public Location[] Points { get; set; } = [];
   public int LoopStart { get; set; } = -1;
 }
 
-public record OdePoint()
+public record Location
 {
   public double Time { get; init; }
   public double Value { get; init; }
