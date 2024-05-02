@@ -6,6 +6,10 @@ public class OdeSolver
 {
   public static Solution Solve(Parameters parameters)
   {
+    if (Validator.IsTrivial(parameters))
+    {
+      return Validator.GetTrivialSolution();
+    }
     return new OdeSolver { Params = parameters }.SolveODE();
   }
 
@@ -43,7 +47,7 @@ public class OdeSolver
   }
 
   /// <summary>
-  /// Taken from `MathNet.Numerics.OdeSolvers.RungeKutta`
+  /// Taken from MathNet.Numerics.OdeSolvers.RungeKutta.
   /// </summary>
   public static Solution SecondOrder(
     Vector<double> y0,
@@ -51,22 +55,25 @@ public class OdeSolver
     Func<Vector<double>, Vector<double>> f
   )
   {
-    int passes = 0;
+    int leftToRightPasses = 0;
+    int loopStart = -1;
     const int MAGIC_NUMBER = 2048;
     var array = new Vector<double>[MAGIC_NUMBER];
     double current = 0;
     array[0] = y0;
     int length = 1;
-    int loopStart = -1;
-    while (length < MAGIC_NUMBER && passes < 2)
+    while (length < MAGIC_NUMBER && leftToRightPasses < 2)
     {
       var vector = f(y0);
       Vector<double> vector2 = f(y0 + vector * step);
       var newY = y0 + step * 0.5 * (vector + vector2);
+      newY[0] = MathUtils.ReduceAngle(newY[0]);
       array[length] = newY;
-      if (y0[0] <= 0 && newY[0] > 0)
+      var prev = y0[0];
+      var next = newY[0];
+      if (prev <= 0 && next > 0)
       {
-        passes++;
+        leftToRightPasses++;
         if (loopStart == -1)
         {
           loopStart = length - 1;
@@ -91,6 +98,10 @@ public class AnalyticSolver
 {
   public static Solution Solve(Parameters parameters)
   {
+    if (Validator.IsTrivial(parameters))
+    {
+      return Validator.GetTrivialSolution();
+    }
     return new AnalyticSolver(parameters).SolveAnalytic();
   }
 
@@ -192,10 +203,48 @@ public record Parameters
   public bool IsExact { get; set; }
 }
 
+public class Validator
+{
+  private static readonly double _angleEpsilon = 1e-6;
+  private static readonly double _speedEpsilon = 1e-6;
+
+  public static bool IsTrivial(Parameters parameters)
+  {
+    return Math.Abs(parameters.InitialSpeed) < _speedEpsilon
+      && Math.Abs(MathUtils.ReduceAngle(parameters.InitialAngle))
+        < _angleEpsilon;
+  }
+
+  public static Solution GetTrivialSolution()
+  {
+    return new Solution
+    {
+      Points = [new OdePoint { Time = 0, Value = 0 }],
+      LoopStart = 0
+    };
+  }
+}
+
+public class MathUtils
+{
+  public static double ReduceAngle(double angle)
+  {
+    while (angle <= -Math.PI)
+    {
+      angle += 2 * Math.PI;
+    }
+    while (angle > Math.PI)
+    {
+      angle -= 2 * Math.PI;
+    }
+    return angle;
+  }
+}
+
 public record Solution
 {
-  public Location[] Points { get; set; } = [];
   public int LoopStart { get; set; } = -1;
+  public Location[] Points { get; set; } = [];
 }
 
 public record Location
