@@ -11,21 +11,21 @@ export default function Info() {
   const { Slide } = Slides[currentSlide];
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto">
+      <div className="container mx-auto center">
         <NavigationBar currentSiteUrl={Urls.infoURL} />
-        <div className="flex flex-col h-75vh justify-between p-5">
-          <div>
-            <Slide />
-          </div>
+        <div className="flex flex-col h-[70vh] justify-between p-5 overflow-auto bg-gray-200">
+          <Slide />
+        </div>
+        <div className="container fixed bottom-0 h-[30vh] z-10 bg-gray-100">
           <NavigationArrows
             currentSlide={currentSlide}
             setCurrentSlide={setCurrentSlide}
           />
+          <NavigationPanel
+            currentSlide={currentSlide}
+            setCurrentSlide={setCurrentSlide}
+          />
         </div>
-        <NavigationPanel
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
-        />
       </div>
     </div>
   );
@@ -415,7 +415,7 @@ function SlideTemplate({ children }: { children: ReactNode }) {
 function Figure({ children, text }: { children?: ReactNode; text?: string }) {
   return (
     <>
-      <div className="h-80 m-4">{children}</div>
+      <div className="relative h-80 m-4">{children}</div>
       <div>{text}</div>
     </>
   );

@@ -55,7 +55,14 @@ export function PendulumContainer({
   isWaitingToStart,
   color,
   onReady,
-  pendulumParams: { initialAngle, initialSpeed, timeStep, pendulumType },
+  pendulumParams: {
+    initialAngle,
+    initialSpeed,
+    timeStep,
+    pendulumType,
+    length,
+    acceleration,
+  },
 }: PendulumContainerProps) {
   const [angle, setAngle] = useState(initialAngle);
   const data = useRef<Data>({ points: [], loopStart: 0 });
@@ -64,13 +71,24 @@ export function PendulumContainer({
 
   useEffect(() => {
     cancelAnimationFrame(job.current.job);
+    setIsReady(false);
+    console.log(`canceling ${job.current.job}`);
     const endpoint =
       pendulumType == PendulumType.ODE
         ? "ode"
         : pendulumType == PendulumType.Approximation
         ? "approx"
         : "ode";
-    const queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+
+    if (length !== undefined) {
+      queryParam += `&length=${length}`;
+    }
+
+    if (acceleration !== undefined) {
+      queryParam += `&acceleration=${acceleration}`;
+    }
+
     axios
       .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
       .then((response) => {
@@ -80,7 +98,15 @@ export function PendulumContainer({
         onReady && onReady();
         setIsReady(true);
       });
-  }, [initialAngle, initialSpeed, timeStep, pendulumType, onReady]);
+  }, [
+    initialAngle,
+    initialSpeed,
+    timeStep,
+    pendulumType,
+    length,
+    acceleration,
+    onReady,
+  ]);
 
   useEffect(() => {
     cancelAnimationFrame(job.current.job);
@@ -107,6 +133,8 @@ interface PendulumContainerProps {
     initialSpeed: number;
     timeStep: number;
     pendulumType: PendulumType;
+    length?: number;
+    acceleration?: number;
   };
 }
 
@@ -114,44 +142,24 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
   return (
     <div
       style={{
-        position: "absolute",
         transform: `rotate(${angle}rad)`,
-        transformOrigin: "top left",
       }}
+      className="absolute origin-top-left"
     >
       <div
         style={{
-          position: "absolute",
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
           backgroundColor: color,
-          borderColor: "black",
-          borderWidth: "4px",
-          transform: `translate(-50%, -50%)`,
-          zIndex: 1,
         }}
+        className={
+          "absolute w-5 h-5 rounded-full bg-black border-4 border-black transform -translate-x-1/2 -translate-y-1/2 z-10"
+        }
       />
+      <div className="w-1 h-72 bg-black transform -translate-x-1/2" />
       <div
         style={{
-          width: "4px",
-          height: "300px",
-          backgroundColor: "black",
-          transform: `translate(-50%, 0)`,
-        }}
-      />
-      <div
-        style={{
-          width: "50px",
-          height: "50px",
-          borderRadius: "50%",
           backgroundColor: color,
-          left: "-23px",
-          top: "295px",
-          borderWidth: "4px",
-          borderColor: "black",
-          transform: "translate(-50%, -50%)",
         }}
+        className="w-12 h-12 rounded-full bg-black border-4 border-black transform -translate-x-1/2 -translate-y-1/2"
       />
     </div>
   );
@@ -205,7 +213,7 @@ type Data = {
 };
 
 export const enum PendulumType {
-  ODE,
-  Approximation,
-  Default,
+  ODE = "ODE",
+  Approximation = "Approximation",
+  Default = "Default",
 }
