@@ -219,7 +219,7 @@ public class Validator
   {
     return new Solution
     {
-      Points = [new OdePoint { Time = 0, Value = 0 }],
+      Points = [new Location { Time = 0, Value = 0 }],
       LoopStart = 0
     };
   }
