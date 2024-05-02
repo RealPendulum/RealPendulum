@@ -91,6 +91,37 @@ app.MapGet(
   .WithName("Approximate Pendulum Solution")
   .WithOpenApi();
 
+app.MapGet(
+    "/pendulum/random",
+    (
+      double duration = 10,
+      double timeStep = 10,
+      double acceleration = 9.81,
+      double length = 1,
+      double initialAngle = 0,
+      double initialSpeed = 0.1
+    ) =>
+    {
+      int random = new Random().Next(0, 2); // 1-true-ode   0-false-approx
+      var solution = RandomSolver.Solve(
+        new Parameters
+        {
+          Duration = duration,
+          TimeStep = timeStep,
+          Acceleration = acceleration,
+          Length = length,
+          InitialAngle = initialAngle,
+          InitialSpeed = initialSpeed,
+          IsExact = random == 1
+        }
+      );
+
+      return solution;
+    }
+  )
+  .WithName("Random Method Pendulum Solution")
+  .WithOpenApi();
+
 app.UseCors("AllowAnyOrigin");
 
 app.Run();

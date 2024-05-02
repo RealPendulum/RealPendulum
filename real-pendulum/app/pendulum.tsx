@@ -72,12 +72,14 @@ export function PendulumContainer({
   useEffect(() => {
     cancelAnimationFrame(job.current.job);
     setIsReady(false);
-    console.log(`canceling ${job.current.job}`);
+
     const endpoint =
       pendulumType == PendulumType.ODE
         ? "ode"
         : pendulumType == PendulumType.Approximation
         ? "approx"
+        : pendulumType == PendulumType.Random
+        ? "random"
         : "ode";
     let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
 
@@ -216,4 +218,5 @@ export const enum PendulumType {
   ODE = "ODE",
   Approximation = "Approximation",
   Default = "Default",
+  Random = "Random",
 }
