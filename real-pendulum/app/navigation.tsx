@@ -27,7 +27,10 @@ export default function NavigationBar({
                 ? "bg-green-600 hover:bg-green-800"
                 : "bg-blue-600 hover:bg-blue-800"
             } transition duration-200 hover:scale-125 text-white font-sans font-normal text-base`}
-            sx={{ textTransform: "none" }}
+            sx={{
+              textTransform: "none",
+            }}
+            style={{ color: "white" }}
           >
             {title}
           </Button>
