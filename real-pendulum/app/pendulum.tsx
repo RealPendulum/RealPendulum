@@ -65,7 +65,7 @@ export function PendulumContainer({
   },
 }: PendulumContainerProps) {
   const [angle, setAngle] = useState(initialAngle);
-  const data = useRef<Data>({ points: [], loopStart: 0 });
+  const data = useRef<Data>({ id: "", solution: { points: [], loopStart: 0 } });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
 
@@ -113,7 +113,7 @@ export function PendulumContainer({
   useEffect(() => {
     cancelAnimationFrame(job.current.job);
     if (!isWaitingToStart && isReady) {
-      job.current = startLoop(data.current, setAngle);
+      job.current = startLoop(data.current.solution, setAngle);
     }
     return () => {
       const jobNumber = job.current.job;
@@ -168,49 +168,51 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
 }
 
 function startLoop(
-  data: Data,
+  solution: Solution,
   setAngle: Dispatch<SetStateAction<number>>
 ): { job: number } {
   let startTimestamp = performance.now();
   let frame = 0;
-  const dataLength = data.points.length;
+  const dataLength = solution.points.length;
   let job = { job: requestAnimationFrame(loop) };
   return job;
 
   function loop() {
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
-    const timeAtLoopStart = data.points[data.loopStart].time;
+    const timeAtLoopStart = solution.points[solution.loopStart].time;
 
-    if (frame >= data.loopStart) {
-      while (data.points[frame].time - timeAtLoopStart <= userTime) {
+    if (frame >= solution.loopStart) {
+      while (solution.points[frame].time - timeAtLoopStart <= userTime) {
         frame = frame + 1;
         if (frame >= dataLength) {
-          frame = data.loopStart;
+          frame = solution.loopStart;
           startTimestamp = timestamp;
           break;
         }
       }
     } else {
-      while (data.points[frame].time <= userTime) {
+      while (solution.points[frame].time <= userTime) {
         frame = frame + 1;
       }
-      if (frame >= data.loopStart) {
+      if (frame >= solution.loopStart) {
         startTimestamp = timestamp;
       }
     }
 
-    const angle = data.points[frame].value;
+    const angle = solution.points[frame].value;
     setAngle(angle);
     job.job = requestAnimationFrame(loop);
   }
 }
 
 type Data = {
-  points: {
-    time: number;
-    value: number;
-  }[];
+  id: string;
+  solution: Solution;
+};
+
+type Solution = {
+  points: { time: number; value: number }[];
   loopStart: number;
 };
 
