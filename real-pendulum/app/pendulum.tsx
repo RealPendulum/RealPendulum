@@ -8,7 +8,6 @@ import {
 } from "react";
 import axios from "axios";
 import { getFrameDuration } from "./framerate";
-import { time } from "console";
 
 export function TwoPendulums() {
   const [isWaitingToStart, setIsWaitingToStart] = useState(true);

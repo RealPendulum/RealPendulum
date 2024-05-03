@@ -13,7 +13,6 @@ export function getFrameDuration() {
       const difference = newTimestamp - oldTimestamp;
       console.log("difference", difference);
       oldTimestamp = newTimestamp;
-      const fpsValue = 1000 / difference;
       totalTime += difference;
       if (counter < length) {
         requestAnimationFrame(callback);

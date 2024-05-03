@@ -1,4 +1,4 @@
-import Urls from "@/urls";
+import Urls from "@/app/urls";
 import NavigationBar from "@/app/navigation";
 import { useRef, useState } from "react";
 import { PendulumContainer, PendulumType } from "@/app/pendulum";

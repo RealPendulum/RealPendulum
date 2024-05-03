@@ -1,5 +1,5 @@
 import NavigationBar from "@/app/navigation";
-import Urls from "@/urls";
+import Urls from "@/app/urls";
 
 export default function Contact() {
   return (
