@@ -11,6 +11,7 @@ export function getFrameDuration() {
     function callback() {
       const newTimestamp = performance.now();
       const difference = newTimestamp - oldTimestamp;
+      console.log("difference", difference);
       oldTimestamp = newTimestamp;
       values[counter] = difference;
 
@@ -19,6 +20,7 @@ export function getFrameDuration() {
       } else {
         const meanFrameDuration = calculateFrameDuration(values);
         if (meanFrameDuration > 0) {
+          console.log("Mean frame duration", meanFrameDuration);
           resolve(meanFrameDuration);
         } else {
           console.log("Failed to converge, retrying");
