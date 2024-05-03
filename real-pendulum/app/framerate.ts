@@ -11,7 +11,6 @@ export function getFrameDuration() {
     function callback() {
       const newTimestamp = performance.now();
       const difference = newTimestamp - oldTimestamp;
-      console.log("difference", difference);
       oldTimestamp = newTimestamp;
       values[counter] = difference;
 
@@ -20,10 +19,8 @@ export function getFrameDuration() {
       } else {
         const meanFrameDuration = calculateFrameDuration(values);
         if (meanFrameDuration > 0) {
-          console.log("Mean frame duration", meanFrameDuration);
           resolve(meanFrameDuration);
         } else {
-          console.log("Failed to converge, retrying");
           values = new Array(length).fill(0);
           counter = 0;
           requestAnimationFrame(callback);
@@ -58,8 +55,6 @@ function calculateFrameDuration(values: number[]) {
       if (index !== -1) {
         values.splice(index, 1);
         extremesPresent = true;
-        console.log("Removing extreme value", furthestValue);
-        console.log("Values remaining", values);
       }
     }
 
