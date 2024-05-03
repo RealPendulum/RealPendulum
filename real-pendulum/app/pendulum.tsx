@@ -95,8 +95,6 @@ export function PendulumContainer({
       .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
       .then((response) => {
         data.current = response.data;
-      })
-      .then(() => {
         onReady && onReady();
         setIsReady(true);
       });
@@ -174,13 +172,15 @@ function startLoop(
   let startTimestamp = performance.now();
   let frame = 0;
   const dataLength = solution.points.length;
+  const loopStart = solution.loopStart == -1 ? 0 : solution.loopStart;
   let job = { job: requestAnimationFrame(loop) };
+
   return job;
 
   function loop() {
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
-    const timeAtLoopStart = solution.points[solution.loopStart].time;
+    const timeAtLoopStart = solution.points[loopStart].time;
 
     if (frame >= solution.loopStart) {
       while (solution.points[frame].time - timeAtLoopStart <= userTime) {
