@@ -11,14 +11,16 @@ export function getFrameDuration() {
     function callback() {
       const newTimestamp = performance.now();
       const difference = newTimestamp - oldTimestamp;
+      console.log("difference", difference);
       oldTimestamp = newTimestamp;
       totalTime += difference;
       if (counter < length) {
         requestAnimationFrame(callback);
         counter++;
       } else {
-        const meanFrameDuration = Math.round(totalTime / length);
-        resolve(meanFrameDuration);
+        const meanFpsValue = Math.round(totalTime / length);
+        console.log(`Mean FPS: ${meanFpsValue}`);
+        resolve(meanFpsValue);
       }
     }
   });
