@@ -4,7 +4,7 @@ import { PendulumContainer, PendulumType } from "@/app/pendulum";
 import { useState } from "react";
 
 import NavigationBar from "@/app/navigation";
-import Urls from "@/urls";
+import Urls from "@/app/urls";
 
 export default function Examples() {
   return (
