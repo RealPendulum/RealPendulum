@@ -11,6 +11,7 @@ export function getFrameDuration() {
     function callback() {
       const newTimestamp = performance.now();
       const difference = newTimestamp - oldTimestamp;
+      console.log("difference", difference);
       oldTimestamp = newTimestamp;
       const fpsValue = 1000 / difference;
       totalTime += difference;
@@ -19,6 +20,7 @@ export function getFrameDuration() {
         counter++;
       } else {
         const meanFpsValue = Math.round(totalTime / length);
+        console.log(`Mean FPS: ${meanFpsValue}`);
         resolve(meanFpsValue);
       }
     }

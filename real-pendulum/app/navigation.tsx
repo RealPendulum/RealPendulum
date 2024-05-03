@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Urls from "@/urls";
+import { Button } from "@mui/material";
+import "@/app/globals.css";
 
 export default function NavigationBar({
   currentSiteUrl,
@@ -16,17 +18,19 @@ export default function NavigationBar({
           ["Examples", Urls.examplesURL],
           ["Contact", Urls.contactURL],
         ].map(([title, url]) => (
-          <Link
+          <Button
             href={url}
             key={title}
+            disabled={currentSiteUrl === url}
             className={`m-3 flex h-24 w-24 items-center justify-center rounded-full ${
               currentSiteUrl === url
                 ? "bg-green-600 hover:bg-green-800"
                 : "bg-blue-600 hover:bg-blue-800"
-            } transition duration-200 hover:scale-125`}
+            } transition duration-200 hover:scale-125 text-white font-sans font-normal text-base`}
+            sx={{ textTransform: "none" }}
           >
             {title}
-          </Link>
+          </Button>
         ))}
       </div>
     </nav>
