@@ -40,7 +40,6 @@ function Playground() {
               pendulumParams={{
                 initialAngle: initialAngle,
                 initialSpeed: initialVelocity,
-                timeStep: 4,
                 pendulumType: pendulumType,
                 length: length,
                 acceleration: acceleration,

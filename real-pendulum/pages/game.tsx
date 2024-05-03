@@ -36,7 +36,6 @@ export function ThreePendulums() {
           pendulumParams={{
             initialAngle: 0,
             initialSpeed: 2,
-            timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
@@ -49,7 +48,6 @@ export function ThreePendulums() {
           pendulumParams={{
             initialAngle: 0,
             initialSpeed: 2,
-            timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
@@ -62,7 +60,6 @@ export function ThreePendulums() {
           pendulumParams={{
             initialAngle: 0,
             initialSpeed: 2,
-            timeStep: 4,
             pendulumType: PendulumType.Random,
           }}
         />

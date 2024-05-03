@@ -7,6 +7,8 @@ import {
   type Dispatch,
 } from "react";
 import axios from "axios";
+import { getFrameDuration } from "./framerate";
+import { time } from "console";
 
 export function TwoPendulums() {
   const [isWaitingToStart, setIsWaitingToStart] = useState(true);
@@ -29,7 +31,6 @@ export function TwoPendulums() {
           pendulumParams={{
             initialAngle: 0,
             initialSpeed: 2,
-            timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
@@ -42,7 +43,6 @@ export function TwoPendulums() {
           pendulumParams={{
             initialAngle: 0,
             initialSpeed: 2,
-            timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
@@ -58,7 +58,6 @@ export function PendulumContainer({
   pendulumParams: {
     initialAngle,
     initialSpeed,
-    timeStep,
     pendulumType,
     length,
     acceleration,
@@ -68,40 +67,49 @@ export function PendulumContainer({
   const data = useRef<Data>({ id: "", solution: { points: [], loopStart: 0 } });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
+  const frameDuration = useRef<number>(-1);
 
   useEffect(() => {
     cancelAnimationFrame(job.current.job);
     setIsReady(false);
+    const timeStepRequest =
+      frameDuration.current == -1
+        ? getFrameDuration()
+        : Promise.resolve(frameDuration.current);
 
-    const endpoint =
-      pendulumType == PendulumType.ODE
-        ? "ode"
-        : pendulumType == PendulumType.Approximation
-        ? "approx"
-        : pendulumType == PendulumType.Random
-        ? "random"
-        : "ode";
-    let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    timeStepRequest.then((timeStepValue) => {
+      frameDuration.current = timeStepValue;
+      const timeStep = Math.round(timeStepValue / 2);
+      const endpoint =
+        pendulumType == PendulumType.ODE
+          ? "ode"
+          : pendulumType == PendulumType.Approximation
+          ? "approx"
+          : pendulumType == PendulumType.Random
+          ? "random"
+          : "ode";
+      let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
 
-    if (length !== undefined) {
-      queryParam += `&length=${length}`;
-    }
+      if (length !== undefined) {
+        queryParam += `&length=${length}`;
+      }
 
-    if (acceleration !== undefined) {
-      queryParam += `&acceleration=${acceleration}`;
-    }
+      if (acceleration !== undefined) {
+        queryParam += `&acceleration=${acceleration}`;
+      }
 
-    axios
-      .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
-      .then((response) => {
-        data.current = response.data;
-        onReady && onReady();
-        setIsReady(true);
-      });
+      axios
+        .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
+        .then((response) => {
+          data.current = response.data;
+          onReady && onReady();
+          setIsReady(true);
+        });
+    });
   }, [
     initialAngle,
     initialSpeed,
-    timeStep,
+    frameDuration,
     pendulumType,
     length,
     acceleration,
@@ -131,7 +139,6 @@ interface PendulumContainerProps {
   pendulumParams: {
     initialAngle: number;
     initialSpeed: number;
-    timeStep: number;
     pendulumType: PendulumType;
     length?: number;
     acceleration?: number;

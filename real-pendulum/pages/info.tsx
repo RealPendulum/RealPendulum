@@ -135,7 +135,6 @@ function Slide1() {
           pendulumParams={{
             initialAngle: 0.5,
             initialSpeed: 0,
-            timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
@@ -161,7 +160,6 @@ function Slide2() {
           pendulumParams={{
             initialAngle: 0.5 * Math.PI,
             initialSpeed: 0,
-            timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
@@ -188,7 +186,6 @@ function Slide3() {
           pendulumParams={{
             initialAngle: 0.2,
             initialSpeed: 0,
-            timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
@@ -214,7 +211,6 @@ function Slide4() {
               pendulumParams={{
                 initialAngle: 0.2,
                 initialSpeed: 0,
-                timeStep: 4,
                 pendulumType: PendulumType.ODE,
               }}
             />
@@ -226,7 +222,6 @@ function Slide4() {
               pendulumParams={{
                 initialAngle: 0.2,
                 initialSpeed: 0,
-                timeStep: 4,
                 pendulumType: PendulumType.Approximation,
               }}
             />
@@ -371,7 +366,6 @@ function Slide13() {
           pendulumParams={{
             initialAngle: 0.45 * Math.PI,
             initialSpeed: 0,
-            timeStep: 4,
             pendulumType: PendulumType.ODE,
           }}
         />
@@ -381,7 +375,6 @@ function Slide13() {
           pendulumParams={{
             initialAngle: 0.45 * Math.PI,
             initialSpeed: 0,
-            timeStep: 4,
             pendulumType: PendulumType.Approximation,
           }}
         />
