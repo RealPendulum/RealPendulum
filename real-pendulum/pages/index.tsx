@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import NavigationBar from "@/app/navigation";
 import { TwoPendulums } from "@/app/pendulum";
-import Urls from "@/urls";
+import Urls from "@/app/urls";
 
 export default function Home() {
   return (

@@ -4,27 +4,31 @@ import { PendulumType, PendulumContainer } from "@/app/pendulum";
 import "@/app/globals.css";
 import Link from "next/link";
 import NavigationBar from "@/app/navigation";
-import Urls from "@/urls";
+import Urls from "@/app/urls";
 
 export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { Slide } = Slides[currentSlide];
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto center">
-        <NavigationBar currentSiteUrl={Urls.infoURL} />
-        <div className="flex flex-col h-[70vh] justify-between p-5 overflow-auto bg-gray-200">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <NavigationBar currentSiteUrl={Urls.infoURL} />
+      <div className="flex-grow overflow-auto bg-gray-200">
+        <div className="container center mx-auto p-5">
           <Slide />
         </div>
-        <div className="container fixed bottom-0 h-[30vh] z-10 bg-gray-100">
-          <NavigationArrows
-            currentSlide={currentSlide}
-            setCurrentSlide={setCurrentSlide}
-          />
-          <NavigationPanel
-            currentSlide={currentSlide}
-            setCurrentSlide={setCurrentSlide}
-          />
+      </div>
+      <div className="p-5">
+        <div className="container mx-auto p-5">
+          <div className="flex flex-col gap-4">
+            <NavigationArrows
+              currentSlide={currentSlide}
+              setCurrentSlide={setCurrentSlide}
+            />
+            <NavigationPanel
+              currentSlide={currentSlide}
+              setCurrentSlide={setCurrentSlide}
+            />
+          </div>
         </div>
       </div>
     </div>

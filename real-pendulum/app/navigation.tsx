@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Urls from "@/urls";
+import Urls from "./urls";
 
 export default function NavigationBar({
   currentSiteUrl,
@@ -13,7 +13,7 @@ export default function NavigationBar({
           ["Home", Urls.homeURL],
           ["Info", Urls.infoURL],
           ["Game", Urls.gameURL],
-          ["Examples", Urls.examplesURL],
+          ["Playground", Urls.examplesURL],
           ["Contact", Urls.contactURL],
         ].map(([title, url]) => (
           <Link
