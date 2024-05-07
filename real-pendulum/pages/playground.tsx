@@ -103,6 +103,12 @@ function Playground() {
           min={0.01}
           max={10}
           step={0.01}
+          marks={[
+            {
+              value: 1,
+              label: "1m",
+            },
+          ]}
           valueLabelDisplay="on"
           valueLabelFormat={(value) => `${value.toFixed(2)}m`}
           onChangeCommitted={(_event, value) => setLength(value as number)}
@@ -113,6 +119,12 @@ function Playground() {
           min={-100}
           max={100}
           step={0.01}
+          marks={[
+            {
+              value: 9.81,
+              label: "9.81m/s²",
+            },
+          ]}
           valueLabelDisplay="on"
           valueLabelFormat={(value) => `${value.toFixed(2)}m/s²`}
           onChangeCommitted={(_event, value) =>

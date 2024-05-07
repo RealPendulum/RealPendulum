@@ -9,47 +9,6 @@ import {
 import axios from "axios";
 import { getFrameDuration } from "./framerate";
 
-export function TwoPendulums() {
-  const [isWaitingToStart, setIsWaitingToStart] = useState(true);
-  const readyCount = useRef(0);
-
-  const startAnimation = () => {
-    readyCount.current += 1;
-    if (readyCount.current == 2) {
-      setIsWaitingToStart(false);
-    }
-  };
-
-  return (
-    <div className="w-80 h-80">
-      <div className="absolute left-1/2">
-        <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
-          color="lightgreen"
-          onReady={startAnimation}
-          pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
-            pendulumType: PendulumType.ODE,
-          }}
-        />
-      </div>
-      <div className="absolute left-1/2">
-        <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
-          color="aquamarine"
-          onReady={startAnimation}
-          pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
-            pendulumType: PendulumType.Approximation,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function PendulumContainer({
   isWaitingToStart,
   color,
@@ -63,7 +22,10 @@ export function PendulumContainer({
   },
 }: PendulumContainerProps) {
   const [angle, setAngle] = useState(initialAngle);
-  const data = useRef<Data>({ id: "", solution: { points: [], loopStart: 0 } });
+  const data = useRef<Data>({
+    id: "",
+    solution: { headLocation: [], loopLocation: [] },
+  });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
   const frameDuration = useRef<number>(-1);
@@ -128,7 +90,7 @@ export function PendulumContainer({
     };
   }, [isWaitingToStart, isReady]);
 
-  return <Pendulum color={color} angle={angle} />;
+  return <Pendulum color={color} angle={angle} length={length ?? 1} />;
 }
 
 interface PendulumContainerProps {
@@ -144,7 +106,7 @@ interface PendulumContainerProps {
   };
 }
 
-function Pendulum({ color, angle }: { color: string; angle: number }) {
+function Pendulum({ color, angle, length }: PendulumProps) {
   return (
     <div
       style={{
@@ -160,7 +122,12 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
           "absolute w-5 h-5 rounded-full bg-black border-4 border-black transform -translate-x-1/2 -translate-y-1/2 z-10"
         }
       />
-      <div className="w-1 h-72 bg-black transform -translate-x-1/2" />
+      <div
+        className="w-1  bg-black transform -translate-x-1/2"
+        style={{
+          height: (length ?? 1) * 18 + "rem",
+        }}
+      />
       <div
         style={{
           backgroundColor: color,
@@ -171,44 +138,66 @@ function Pendulum({ color, angle }: { color: string; angle: number }) {
   );
 }
 
+interface PendulumProps {
+  color: string;
+  angle: number;
+  length?: number;
+}
+
 function startLoop(
   solution: Solution,
   setAngle: Dispatch<SetStateAction<number>>
 ): { job: number } {
   let startTimestamp = performance.now();
   let frame = 0;
-  const dataLength = solution.points.length;
-  const loopStart = solution.loopStart == -1 ? 0 : solution.loopStart;
-  let job = { job: requestAnimationFrame(loop) };
+  const { headLocation, loopLocation } = solution;
+
+  let job: { job: number } = { job: -1 };
+  if (headLocation.length > 0) {
+    requestAnimationFrame(headLoop);
+  } else if (loopLocation.length > 0) {
+    requestAnimationFrame(loopLoop);
+  }
 
   return job;
 
-  function loop() {
+  function headLoop() {
     const timestamp = performance.now();
     const userTime = (timestamp - startTimestamp) / 1000;
-    const timeAtLoopStart = solution.points[loopStart].time;
 
-    if (frame >= solution.loopStart) {
-      while (solution.points[frame].time - timeAtLoopStart <= userTime) {
-        frame = frame + 1;
-        if (frame >= dataLength) {
-          frame = solution.loopStart;
+    while (headLocation[frame].time <= userTime) {
+      ++frame;
+      if (frame >= headLocation.length) {
+        if (loopLocation.length > 0) {
           startTimestamp = timestamp;
-          break;
+          frame = 0;
+          loopLoop();
         }
-      }
-    } else {
-      while (solution.points[frame].time <= userTime) {
-        frame = frame + 1;
-      }
-      if (frame >= solution.loopStart) {
-        startTimestamp = timestamp;
+        return;
       }
     }
 
-    const angle = solution.points[frame].value;
+    const angle = headLocation[frame].value;
     setAngle(angle);
-    job.job = requestAnimationFrame(loop);
+    job.job = requestAnimationFrame(headLoop);
+  }
+
+  function loopLoop() {
+    const timestamp = performance.now();
+    const userTime = (timestamp - startTimestamp) / 1000;
+
+    while (loopLocation[frame].time <= userTime) {
+      ++frame;
+      if (frame >= loopLocation.length) {
+        frame = 0;
+        startTimestamp = timestamp;
+        break;
+      }
+    }
+
+    const angle = loopLocation[frame].value;
+    setAngle(angle);
+    job.job = requestAnimationFrame(loopLoop);
   }
 }
 
@@ -218,8 +207,8 @@ type Data = {
 };
 
 type Solution = {
-  points: { time: number; value: number }[];
-  loopStart: number;
+  headLocation: { time: number; value: number }[];
+  loopLocation: { time: number; value: number }[];
 };
 
 export const enum PendulumType {
