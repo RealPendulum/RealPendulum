@@ -15,8 +15,9 @@ public class OdeSolver
 
   private Solution SolveODE()
   {
+    var initialAngularVelocity = Params.InitialLinearVelocity / Params.Length;
     var y0 = Vector<double>.Build.Dense(
-      [Params.InitialAngle, Params.InitialSpeed]
+      [Params.InitialAngle, initialAngularVelocity]
     );
 
     var timeStepInSeconds = Params.TimeStep / 1000;
@@ -76,7 +77,7 @@ public class OdeSolver
         leftToRightPasses++;
         if (loopStart == -1)
         {
-          loopStart = length - 1;
+          loopStart = length;
         }
       }
       current += step;
@@ -90,7 +91,27 @@ public class OdeSolver
       .Select((y, i) => new Location { Time = i * step, Value = y[0] })
       .ToArray();
 
-    return new Solution { Points = points, LoopStart = loopStart };
+    if (loopStart != -1)
+    {
+      var offsetTime = points[loopStart].Time;
+      var HeadLocation = points.Take(loopStart);
+      var LoopLocation = points
+        .Skip(loopStart)
+        .Select(p => new Location
+        {
+          Time = p.Time - offsetTime,
+          Value = p.Value
+        });
+      return new Solution
+      {
+        HeadLocation = HeadLocation.ToArray(),
+        LoopLocation = LoopLocation.ToArray()
+      };
+    }
+    else
+    {
+      return new Solution { HeadLocation = [.. points], LoopLocation = [] };
+    }
   }
 }
 
@@ -132,19 +153,63 @@ public class AnalyticSolver
         passes++;
         if (loopStart == -1)
         {
-          loopStart = length - 1;
+          loopStart = length;
         }
       }
 
       length++;
     }
 
-    return new Solution { Points = [.. points], LoopStart = loopStart };
+    if (loopStart != -1)
+    {
+      var offsetTime = points[loopStart].Time;
+      var HeadLocation = points.Take(loopStart);
+      var LoopLocation = points
+        .Skip(loopStart)
+        .Select(p => new Location
+        {
+          Time = p.Time - offsetTime,
+          Value = p.Value
+        });
+      return new Solution
+      {
+        HeadLocation = HeadLocation.ToArray(),
+        LoopLocation = LoopLocation.ToArray()
+      };
+    }
+    else
+    {
+      return new Solution { HeadLocation = [.. points], LoopLocation = [] };
+    }
   }
 
   private double PendulumApproxSolved(double t)
   {
     return Amplitude * Math.Sin(Omega * t + PhaseShift);
+  }
+
+  private AnalyticSolver(Parameters parameters)
+  {
+    Params = parameters;
+    Omega = Math.Sqrt(Params.Acceleration / Params.Length);
+    InitialAngularVelocity = Params.InitialLinearVelocity / Params.Length;
+    if (InitialAngularVelocity == 0)
+    {
+      PhaseShift = Math.PI / 2 * Math.Sign(Params.InitialAngle);
+      Amplitude = Params.InitialAngle;
+    }
+    else if (Params.InitialAngle == 0)
+    {
+      PhaseShift = 0;
+      Amplitude = InitialAngularVelocity / Omega;
+    }
+    else
+    {
+      PhaseShift = Math.Atan(
+        Params.InitialAngle * Omega / InitialAngularVelocity
+      );
+      Amplitude = InitialAngularVelocity / Omega / Math.Sin(PhaseShift);
+    }
   }
 
   private Parameters Params { get; set; }
@@ -155,26 +220,7 @@ public class AnalyticSolver
 
   private double Amplitude { get; set; }
 
-  private AnalyticSolver(Parameters parameters)
-  {
-    Params = parameters;
-    Omega = Math.Sqrt(Params.Acceleration / Params.Length);
-    if (Params.InitialSpeed == 0)
-    {
-      PhaseShift = Math.PI / 2 * Math.Sign(Params.InitialAngle);
-      Amplitude = Params.InitialAngle;
-    }
-    else if (Params.InitialAngle == 0)
-    {
-      PhaseShift = 0;
-      Amplitude = Params.InitialSpeed / Omega;
-    }
-    else
-    {
-      PhaseShift = Math.Atan(Params.InitialAngle * Omega / Params.InitialSpeed);
-      Amplitude = Params.InitialSpeed / Omega / Math.Sin(PhaseShift);
-    }
-  }
+  private double InitialAngularVelocity { get; set; }
 }
 
 public class RandomSolver
@@ -199,28 +245,50 @@ public record Parameters
   public double Acceleration { get; set; }
   public double Length { get; set; }
   public double InitialAngle { get; set; }
-  public double InitialSpeed { get; set; }
+  public double InitialLinearVelocity { get; set; }
   public bool IsExact { get; set; }
 }
 
 public class Validator
 {
   private static readonly double _angleEpsilon = 1e-6;
-  private static readonly double _speedEpsilon = 1e-6;
+  private static readonly double _linearVelocityEpsilon = 1e-6;
 
   public static bool IsTrivial(Parameters parameters)
   {
-    return Math.Abs(parameters.InitialSpeed) < _speedEpsilon
+    if (parameters.TimeStep <= 0)
+    {
+      return true;
+    }
+    if (parameters.Duration * 1000 <= parameters.TimeStep)
+    {
+      return true;
+    }
+    if (parameters.Length <= 0)
+    {
+      return true;
+    }
+    if (!parameters.IsExact && parameters.Acceleration <= 0)
+    {
+      return true;
+    }
+    if (
+      Math.Abs(parameters.InitialLinearVelocity) < _linearVelocityEpsilon
       && Math.Abs(MathUtils.ReduceAngle(parameters.InitialAngle))
-        < _angleEpsilon;
+        < _angleEpsilon
+    )
+    {
+      return true;
+    }
+    return false;
   }
 
   public static Solution GetTrivialSolution()
   {
     return new Solution
     {
-      Points = [new Location { Time = 0, Value = 0 }],
-      LoopStart = 0
+      HeadLocation = [new Location { Time = 0, Value = 0 }],
+      LoopLocation = []
     };
   }
 }
@@ -243,8 +311,8 @@ public class MathUtils
 
 public record Solution
 {
-  public int LoopStart { get; set; } = -1;
-  public Location[] Points { get; set; } = [];
+  public required Location[] HeadLocation { get; set; }
+  public required Location[] LoopLocation { get; set; }
 }
 
 public record Location

@@ -27,7 +27,7 @@ static class EndpointData
         Acceleration = acceleration,
         Length = length,
         InitialAngle = initialAngle,
-        InitialSpeed = initialSpeed,
+        InitialLinearVelocity = initialSpeed,
         IsExact = isExact
       }
     );
@@ -56,7 +56,7 @@ static class EndpointData
         Acceleration = acceleration,
         Length = length,
         InitialAngle = initialAngle,
-        InitialSpeed = initialSpeed,
+        InitialLinearVelocity = initialSpeed,
         IsExact = false
       }
     );
@@ -86,7 +86,7 @@ static class EndpointData
         Acceleration = acceleration,
         Length = length,
         InitialAngle = initialAngle,
-        InitialSpeed = initialSpeed,
+        InitialLinearVelocity = initialSpeed,
         IsExact = random == 1
       }
     );
