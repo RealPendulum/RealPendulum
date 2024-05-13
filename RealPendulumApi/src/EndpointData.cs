@@ -91,11 +91,32 @@ static class EndpointData
       }
     );
 
+    var solutionType = random == 1 ? "ode" : "approx";
+
     return new SolutionWithId
     {
-      Id = Identificator.GenerateId("random"),
+      Id = Identificator.GenerateId(solutionType),
       Solution = solution,
     };
+  }
+
+  public static IResult CheckAnswer(string id, string answer)
+  {
+    if (!Identificator.IsValidAnswer(id, answer))
+    {
+      return Results.BadRequest("Invalid answer format");
+    }
+
+    bool isCorrect = Identificator.IsCorrectAnswer(id, answer);
+
+    if (isCorrect)
+    {
+      return Results.Ok();
+    }
+    else
+    {
+      return Results.Ok(new { message = "Incorrect answer" });
+    }
   }
 }
 
