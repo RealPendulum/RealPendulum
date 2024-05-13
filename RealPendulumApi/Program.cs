@@ -40,6 +40,10 @@ app.MapGet("/pendulum/random", EndpointData.SolvePendulumRandom)
   .WithName("Random Method Pendulum Solution")
   .WithOpenApi();
 
+app.MapGet("/result", EndpointData.CheckAnswer)
+  .WithName("Check Player Answer Correctness")
+  .WithOpenApi();
+
 app.UseCors("AllowAnyOrigin");
 
 app.Run();

@@ -91,11 +91,22 @@ static class EndpointData
       }
     );
 
+    var solutionType = random == 1 ? "ode" : "approx";
+
     return new SolutionWithId
     {
-      Id = Identificator.GenerateId("random"),
+      Id = Identificator.GenerateId(solutionType),
       Solution = solution,
     };
+  }
+
+  public static bool CheckAnswer(
+    string id,
+    string solutionType = "ode",
+    string answer = "ode"
+  )
+  {
+    return Identificator.IsCorrectAnswer(id, answer);
   }
 }
 
