@@ -16,16 +16,25 @@ static class Identificator
 
   public static bool IsCorrectAnswer(string id, string answer)
   {
-    if (solutionsWithId.ContainsKey(id))
+    var solution = solutionsWithId[id];
+
+    solution.Answer = answer;
+    return solution.SolutionType == answer;
+  }
+
+  public static bool IsValidAnswer(string id, string answer)
+  {
+    if (!solutionsWithId.TryGetValue(id, out GameRecord? value))
     {
-      var solution = solutionsWithId[id];
-      solution.Answer = answer;
-      if (solution.SolutionType == answer)
-      {
-        return true;
-      }
+      return false;
     }
-    return false;
+
+    if (value.Answer != null)
+    {
+      return false;
+    }
+
+    return answer == "ode" || answer == "approx";
   }
 }
 

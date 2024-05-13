@@ -100,13 +100,23 @@ static class EndpointData
     };
   }
 
-  public static bool CheckAnswer(
-    string id,
-    string solutionType = "ode",
-    string answer = "ode"
-  )
+  public static IResult CheckAnswer(string id, string answer)
   {
-    return Identificator.IsCorrectAnswer(id, answer);
+    if (!Identificator.IsValidAnswer(id, answer))
+    {
+      return Results.BadRequest("Invalid answer format");
+    }
+
+    bool isCorrect = Identificator.IsCorrectAnswer(id, answer);
+
+    if (isCorrect)
+    {
+      return Results.Ok();
+    }
+    else
+    {
+      return Results.Ok(new { message = "Incorrect answer" });
+    }
   }
 }
 
