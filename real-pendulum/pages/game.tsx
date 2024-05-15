@@ -112,7 +112,7 @@ export function TwoPendulums() {
         </div>
       )}
       <div className="flex text-black justify-center bg-blue-300 mb-16">
-        ${stats}% of players were right.
+        {stats}% of players were right.
       </div>
     </div>
   );
@@ -141,6 +141,7 @@ function getStats(callback: (stats: number) => void) {
   axios
     .get(`http://localhost:5068/stats`)
     .then((response) => {
+      console.log("stats");
       console.log(response.data);
       const stats = response.data;
       callback(stats);
