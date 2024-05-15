@@ -24,6 +24,7 @@ export function TwoPendulums() {
   const rightId = useRef("");
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [stats, setStats] = useState(0);
 
   const registerLeft = (id: string) => {
     leftId.current = id;
@@ -82,6 +83,7 @@ export function TwoPendulums() {
           onClick={() => {
             sendAnswer(leftId.current, setIsAnswerCorrect);
             setHasAnswered(true);
+            getStats(setStats);
           }}
         >
           {"left"}
@@ -94,6 +96,7 @@ export function TwoPendulums() {
           onClick={() => {
             sendAnswer(rightId.current, setIsAnswerCorrect);
             setHasAnswered(true);
+            getStats(setStats);
           }}
         >
           {"right"}
@@ -109,7 +112,7 @@ export function TwoPendulums() {
         </div>
       )}
       <div className="flex text-black justify-center bg-blue-300 mb-16">
-        20% of players were right.
+        ${stats}% of players were right.
       </div>
     </div>
   );
@@ -132,6 +135,19 @@ function sendAnswer(id: string, callback: (isAnswerCorrect: boolean) => void) {
 
 function isCorrectAnswer(data: string | { message: string }) {
   return typeof data === "string";
+}
+
+function getStats(callback: (stats: number) => void) {
+  axios
+    .get(`http://localhost:5068/stats`)
+    .then((response) => {
+      console.log(response.data);
+      const stats = response.data;
+      callback(stats);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 //endpoint stats, zapytanie get bezparametrowe - ilu użytkowników miało rację, przejść po całej mapie
