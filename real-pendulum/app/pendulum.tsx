@@ -63,7 +63,7 @@ export function PendulumContainer({
         .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
         .then((response) => {
           data.current = response.data;
-          onReady && onReady();
+          onReady && onReady(data.current.id);
           setIsReady(true);
         });
     });
@@ -96,7 +96,7 @@ export function PendulumContainer({
 interface PendulumContainerProps {
   isWaitingToStart: boolean;
   color: string;
-  onReady?: () => void;
+  onReady?: (id: string) => void;
   pendulumParams: {
     initialAngle: number;
     initialSpeed: number;

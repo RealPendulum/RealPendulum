@@ -3,67 +3,141 @@ import NavigationBar from "@/app/navigation";
 import { useRef, useState } from "react";
 import { PendulumContainer, PendulumType } from "@/app/pendulum";
 import "@/app/globals.css";
+import { Button } from "@mui/material";
+import axios from "axios";
 
 export default function Game() {
   return (
     <div className="min-h-screen bg-gray-100">
       <NavigationBar currentSiteUrl={Urls.gameURL} />
       <div className="flex justify-center">
-        <ThreePendulums />
+        <TwoPendulums />
       </div>
     </div>
   );
 }
 
-export function ThreePendulums() {
+export function TwoPendulums() {
   const [isWaitingToStart, setIsWaitingToStart] = useState(true);
   const readyCount = useRef(0);
+  const leftId = useRef("");
+  const rightId = useRef("");
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
+  const [hasAnswered, setHasAnswered] = useState(false);
+
+  const registerLeft = (id: string) => {
+    leftId.current = id;
+    startAnimation();
+  };
+
+  const registerRight = (id: string) => {
+    rightId.current = id;
+    startAnimation();
+  };
 
   const startAnimation = () => {
     readyCount.current += 1;
-    if (readyCount.current == 3) {
+    if (readyCount.current == 2) {
       setIsWaitingToStart(false);
     }
   };
 
   return (
-    <div className="w-80 h-80">
-      <div className="absolute left-1/2">
-        <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
-          color="lightgreen"
-          onReady={startAnimation}
-          pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
-            pendulumType: PendulumType.ODE,
-          }}
-        />
+    <div>
+      <div className="flex w-120 h-120 bg-red-200">
+        <div className="relative h-80 m-20 ">
+          <PendulumContainer
+            isWaitingToStart={isWaitingToStart}
+            color="lightgreen"
+            onReady={registerLeft}
+            pendulumParams={{
+              initialAngle: 0,
+              initialSpeed: 2,
+              pendulumType: PendulumType.ODE,
+            }}
+          />
+        </div>
+        <div className="relative h-80 m-20">
+          <PendulumContainer
+            isWaitingToStart={isWaitingToStart}
+            color="aquamarine"
+            onReady={registerRight}
+            pendulumParams={{
+              initialAngle: 0,
+              initialSpeed: 2,
+              pendulumType: PendulumType.Approximation,
+            }}
+          />
+        </div>
       </div>
-      <div className="absolute left-1/2">
-        <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
-          color="aquamarine"
-          onReady={startAnimation}
-          pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
-            pendulumType: PendulumType.Approximation,
-          }}
-        />
+      <div className="flex text-black justify-center bg-green-300">
+        Which pendulum is real?
       </div>
-      <div className="absolute left-1/2">
-        <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
-          color="lightcoral"
-          onReady={startAnimation}
-          pendulumParams={{
-            initialAngle: 0,
-            initialSpeed: 2,
-            pendulumType: PendulumType.Random,
+      <div className="flex justify-center">
+        <Button
+          sx={{ mx: 3 }}
+          variant="outlined"
+          color="primary"
+          disabled={isWaitingToStart || hasAnswered}
+          onClick={() => {
+            sendAnswer(leftId.current, setIsAnswerCorrect);
+            setHasAnswered(true);
           }}
-        />
+        >
+          {"left"}
+        </Button>
+        <Button
+          sx={{ mx: 3 }}
+          variant="outlined"
+          color="primary"
+          disabled={isWaitingToStart || hasAnswered}
+          onClick={() => {
+            sendAnswer(rightId.current, setIsAnswerCorrect);
+            setHasAnswered(true);
+          }}
+        >
+          {"right"}
+        </Button>
+      </div>
+      {isAnswerCorrect === null ? null : isAnswerCorrect ? (
+        <div className="flex text-black justify-center bg-green-300">
+          You were right!
+        </div>
+      ) : (
+        <div className="flex text-black justify-center bg-green-300">
+          You were wrong!
+        </div>
+      )}
+      <div className="flex text-black justify-center bg-blue-300 mb-16">
+        20% of players were right.
       </div>
     </div>
   );
 }
+
+function sendAnswer(id: string, callback: (isAnswerCorrect: boolean) => void) {
+  const queryParam = `id=${id}&answer=ode`;
+  console.log(id);
+  axios
+    .get(`http://localhost:5068/result?${queryParam}`)
+    .then((response) => {
+      console.log(response.data);
+      const isAnswerCorrect = isCorrectAnswer(response.data);
+      callback(isAnswerCorrect);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+function isCorrectAnswer(data: string | { message: string }) {
+  return typeof data === "string";
+}
+
+//endpoint stats, zapytanie get bezparametrowe - ilu użytkowników miało rację, przejść po całej mapie
+// i sprawdzić ile było poprawnych odpowiedzi
+
+// type Data = {
+//   id: string;
+//   answer: string;
+// };
