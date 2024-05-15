@@ -118,6 +118,11 @@ static class EndpointData
       return Results.Ok(new { message = "Incorrect answer" });
     }
   }
+
+  public static double GetStats()
+  {
+    return Identificator.CalculateStats();
+  }
 }
 
 record SolutionWithId

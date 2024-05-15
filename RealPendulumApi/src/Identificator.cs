@@ -36,6 +36,24 @@ static class Identificator
 
     return answer == "ode" || answer == "approx";
   }
+
+  public static double CalculateStats()
+  {
+    double correct = 0;
+    double total = 0;
+    foreach (var solution in solutionsWithId.Values)
+    {
+      if (solution.Answer != null)
+      {
+        total++;
+        if (solution.SolutionType == solution.Answer)
+        {
+          correct++;
+        }
+      }
+    }
+    return correct / total;
+  }
 }
 
 record GameRecord

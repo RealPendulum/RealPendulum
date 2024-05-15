@@ -44,6 +44,10 @@ app.MapGet("/result", EndpointData.CheckAnswer)
   .WithName("Check Player Answer Correctness")
   .WithOpenApi();
 
+app.MapGet("/stats", EndpointData.GetStats)
+  .WithName("Get Game Statistics")
+  .WithOpenApi();
+
 app.UseCors("AllowAnyOrigin");
 
 app.Run();
