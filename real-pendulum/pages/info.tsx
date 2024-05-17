@@ -134,7 +134,6 @@ function Slide1() {
       <TextFromArray texts={texts} />
       <Figure text="PLACEHOLDER: SMALL PENDULUM CLOCK HERE">
         <PendulumContainer
-          isWaitingToStart={false}
           color="lightgreen"
           pendulumParams={{
             initialAngle: 0.5,
@@ -159,7 +158,6 @@ function Slide2() {
       <TextFromArray texts={texts} />
       <Figure text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM">
         <PendulumContainer
-          isWaitingToStart={false}
           color="orange"
           pendulumParams={{
             initialAngle: 0.5 * Math.PI,
@@ -185,7 +183,6 @@ function Slide3() {
       <TextFromArray texts={texts} />
       <Figure text="PLACEHOLDER: APPROXIMATION WITHIN ITS LIMITS">
         <PendulumContainer
-          isWaitingToStart={false}
           color="aquamarine"
           pendulumParams={{
             initialAngle: 0.2,
@@ -210,7 +207,6 @@ function Slide4() {
         <div className="flex flex-row justify-between w-16">
           <div>
             <PendulumContainer
-              isWaitingToStart={false}
               color="pink"
               pendulumParams={{
                 initialAngle: 0.2,
@@ -221,7 +217,6 @@ function Slide4() {
           </div>
           <div>
             <PendulumContainer
-              isWaitingToStart={false}
               color="yellow"
               pendulumParams={{
                 initialAngle: 0.2,
@@ -365,7 +360,6 @@ function Slide13() {
       <TextFromArray texts={texts} />
       <Figure text="PLACEHOLDER: TWO PENDULUMS, ONE REAL, ONE APPROXIMATED">
         <PendulumContainer
-          isWaitingToStart={false}
           color="lightgreen"
           pendulumParams={{
             initialAngle: 0.45 * Math.PI,
@@ -374,7 +368,6 @@ function Slide13() {
           }}
         />
         <PendulumContainer
-          isWaitingToStart={false}
           color="aquamarine"
           pendulumParams={{
             initialAngle: 0.45 * Math.PI,

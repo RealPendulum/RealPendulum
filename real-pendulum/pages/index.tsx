@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import NavigationBar from "@/app/navigation";
 import { PendulumContainer, PendulumType } from "@/app/pendulum";
 import Urls from "@/app/urls";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export default function Home() {
   return (
@@ -18,21 +18,21 @@ export default function Home() {
 }
 
 function ThreePendulums() {
-  const [isWaitingToStart, setIsWaitingToStart] = useState(true);
+  const [start, setStart] = useState(false);
   const readyCount = useRef(0);
 
-  const startAnimation = () => {
+  const startAnimation = useCallback(() => {
     readyCount.current += 1;
     if (readyCount.current == 2) {
-      setIsWaitingToStart(false);
+      setStart(true);
     }
-  };
+  }, []);
 
   return (
     <div className="w-80 h-80">
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="lightgreen"
           onReady={startAnimation}
           pendulumParams={{
@@ -44,7 +44,7 @@ function ThreePendulums() {
       </div>
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="aquamarine"
           onReady={startAnimation}
           pendulumParams={{
@@ -56,7 +56,7 @@ function ThreePendulums() {
       </div>
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="orange"
           onReady={startAnimation}
           pendulumParams={{
