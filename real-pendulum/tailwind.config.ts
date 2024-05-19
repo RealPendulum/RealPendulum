@@ -16,8 +16,20 @@ const config: Config = {
       height: {
         "75vh": "75vh",
       },
+      maxWidth: {
+        "65vh": "65vh",
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addComponents }) {
+      addComponents({
+        ".info-text": {
+          "@apply text-center text-pretty text-black leading-10 text-xl": "",
+          "max-width": "65vh",
+        },
+      });
+    },
+  ],
 };
 export default config;
