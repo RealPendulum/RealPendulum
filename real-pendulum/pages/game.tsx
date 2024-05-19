@@ -7,17 +7,67 @@ import { Button } from "@mui/material";
 import axios from "axios";
 
 export default function Game() {
+  const [currentSite, setCurrentSite] = useState(0);
+  const { Site } = GameSites[currentSite];
   return (
     <div className="min-h-screen bg-gray-100">
       <NavigationBar currentSiteUrl={Urls.gameURL} />
       <div className="flex justify-center">
+        <Site currentSite={currentSite} setCurrentSite={setCurrentSite} />
+      </div>
+      {/* <Difficulty currentSite={currentSite} setCurrentSite={setCurrentSite} /> */}
+      {/* <div className="flex justify-center">
         <TwoPendulums />
+      </div> */}
+    </div>
+  );
+}
+
+const GameSites: Site[] = [{ Site: Difficulty }, { Site: TwoPendulums }];
+interface Site {
+  Site: React.FC<DifficultyProps>;
+}
+
+function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
+  return (
+    <div>
+      <div className="flex justify-center text-black">Difficulty</div>
+      <div className="flex justify-center">
+        <Button
+          sx={{ mx: 3 }}
+          variant="outlined"
+          color="primary"
+          // disabled={isWaitingToStart || hasAnswered}
+          onClick={() => setCurrentSite(1)}
+        >
+          {"easy"}
+        </Button>
+        <Button
+          sx={{ mx: 3 }}
+          variant="outlined"
+          color="primary"
+          // disabled={isWaitingToStart || hasAnswered}
+          // onClick={() => {
+          // }}
+        >
+          {"medium"}
+        </Button>
+        <Button
+          sx={{ mx: 3 }}
+          variant="outlined"
+          color="primary"
+          // disabled={isWaitingToStart || hasAnswered}
+          // onClick={() => {
+          // }}
+        >
+          {"hard"}
+        </Button>
       </div>
     </div>
   );
 }
 
-export function TwoPendulums() {
+export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
   const [isWaitingToStart, setIsWaitingToStart] = useState(true);
   const readyCount = useRef(0);
   const leftId = useRef("");
@@ -112,8 +162,19 @@ export function TwoPendulums() {
         </div>
       )}
       <div className="flex text-black justify-center bg-blue-300 mb-16">
-        {stats}% of players were right.
+        {stats}% of the answers given by the players were correct.
       </div>
+      <Button
+        className={`m-3 flex h-24 w-24 items-center justify-center rounded-full 
+            bg-blue-600 hover:bg-blue-800 transition duration-200 hover:scale-125 text-white font-sans font-normal text-base`}
+        sx={{
+          textTransform: "none",
+        }}
+        style={{ color: "white" }}
+        onClick={() => setCurrentSite(0)}
+      >
+        Go back
+      </Button>
     </div>
   );
 }
@@ -144,17 +205,14 @@ function getStats(callback: (stats: number) => void) {
       console.log("stats");
       console.log(response.data);
       const stats = response.data;
-      callback(stats);
+      callback(Number(Number(stats).toFixed(2)));
     })
     .catch((error) => {
       console.log(error);
     });
 }
 
-//endpoint stats, zapytanie get bezparametrowe - ilu użytkowników miało rację, przejść po całej mapie
-// i sprawdzić ile było poprawnych odpowiedzi
-
-// type Data = {
-//   id: string;
-//   answer: string;
-// };
+interface DifficultyProps {
+  currentSite: number;
+  setCurrentSite: (site: number) => void;
+}
