@@ -16,13 +16,13 @@ export default function Game() {
 }
 
 export function ThreePendulums() {
-  const [isWaitingToStart, setIsWaitingToStart] = useState(true);
+  const [start, setStart] = useState(false);
   const readyCount = useRef(0);
 
   const startAnimation = () => {
     readyCount.current += 1;
     if (readyCount.current == 3) {
-      setIsWaitingToStart(false);
+      setStart(true);
     }
   };
 
@@ -30,7 +30,7 @@ export function ThreePendulums() {
     <div className="w-80 h-80">
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="lightgreen"
           onReady={startAnimation}
           pendulumParams={{
@@ -42,7 +42,7 @@ export function ThreePendulums() {
       </div>
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="aquamarine"
           onReady={startAnimation}
           pendulumParams={{
@@ -54,7 +54,7 @@ export function ThreePendulums() {
       </div>
       <div className="absolute left-1/2">
         <PendulumContainer
-          isWaitingToStart={isWaitingToStart}
+          start={start}
           color="lightcoral"
           onReady={startAnimation}
           pendulumParams={{

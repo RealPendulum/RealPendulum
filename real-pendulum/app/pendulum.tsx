@@ -10,7 +10,7 @@ import axios from "axios";
 import { getFrameDuration } from "./framerate";
 
 export function PendulumContainer({
-  isWaitingToStart,
+  start = true,
   color,
   onReady,
   pendulumParams: {
@@ -31,55 +31,60 @@ export function PendulumContainer({
   const frameDuration = useRef<number>(-1);
 
   useEffect(() => {
-    cancelAnimationFrame(job.current.job);
     setIsReady(false);
     const timeStepRequest =
       frameDuration.current == -1
         ? getFrameDuration()
         : Promise.resolve(frameDuration.current);
 
-    timeStepRequest.then((timeStepValue) => {
-      frameDuration.current = timeStepValue;
-      const timeStep = Math.round(timeStepValue / 2);
-      const endpoint =
-        pendulumType == PendulumType.ODE
-          ? "ode"
-          : pendulumType == PendulumType.Approximation
-          ? "approx"
-          : pendulumType == PendulumType.Random
-          ? "random"
-          : "ode";
-      let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    timeStepRequest
+      .then((timeStepValue) => {
+        frameDuration.current = timeStepValue;
+        const timeStep = Math.round(timeStepValue / 2);
+        const endpoint =
+          pendulumType == PendulumType.ODE
+            ? "ode"
+            : pendulumType == PendulumType.Approximation
+            ? "approx"
+            : pendulumType == PendulumType.Random
+            ? "random"
+            : "ode";
+        let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
 
-      if (length !== undefined) {
-        queryParam += `&length=${length}`;
+        if (length !== undefined) {
+          queryParam += `&length=${length}`;
+        }
+
+        if (acceleration !== undefined) {
+          queryParam += `&acceleration=${acceleration}`;
+        }
+
+        return axios.get(
+          `http://localhost:5068/pendulum/${endpoint}?${queryParam}`
+        );
+      })
+      .then((response) => {
+        data.current = response.data;
+        onReady && onReady();
+        setIsReady(true);
+      })
+      .catch((error) => {
+        console.error(
+          "Failed to fetch pendulum data or to get frame duration",
+          error
+        );
+      });
+
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
       }
-
-      if (acceleration !== undefined) {
-        queryParam += `&acceleration=${acceleration}`;
-      }
-
-      axios
-        .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
-        .then((response) => {
-          data.current = response.data;
-          onReady && onReady();
-          setIsReady(true);
-        });
-    });
-  }, [
-    initialAngle,
-    initialSpeed,
-    frameDuration,
-    pendulumType,
-    length,
-    acceleration,
-    onReady,
-  ]);
+    };
+  }, [onReady, initialAngle, initialSpeed, pendulumType, length, acceleration]);
 
   useEffect(() => {
-    cancelAnimationFrame(job.current.job);
-    if (!isWaitingToStart && isReady) {
+    if (start && isReady) {
       job.current = startLoop(data.current.solution, setAngle);
     }
     return () => {
@@ -88,22 +93,24 @@ export function PendulumContainer({
         cancelAnimationFrame(jobNumber);
       }
     };
-  }, [isWaitingToStart, isReady]);
+  }, [start, isReady]);
 
   return <Pendulum color={color} angle={angle} length={length ?? 1} />;
 }
 
 interface PendulumContainerProps {
-  isWaitingToStart: boolean;
+  start?: boolean;
   color: string;
   onReady?: () => void;
-  pendulumParams: {
-    initialAngle: number;
-    initialSpeed: number;
-    pendulumType: PendulumType;
-    length?: number;
-    acceleration?: number;
-  };
+  pendulumParams: PendulumParams;
+}
+
+interface PendulumParams {
+  initialAngle: number;
+  initialSpeed: number;
+  pendulumType: PendulumType;
+  length?: number;
+  acceleration?: number;
 }
 
 function Pendulum({ color, angle, length }: PendulumProps) {
