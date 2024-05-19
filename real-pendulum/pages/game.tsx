@@ -68,7 +68,7 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
 }
 
 export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
-  const [isWaitingToStart, setIsWaitingToStart] = useState(true);
+  const [start, setStart] = useState(false);
   const readyCount = useRef(0);
   const leftId = useRef("");
   const rightId = useRef("");
@@ -89,7 +89,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
   const startAnimation = () => {
     readyCount.current += 1;
     if (readyCount.current == 2) {
-      setIsWaitingToStart(false);
+      setStart(true);
     }
   };
 
@@ -98,7 +98,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
       <div className="flex w-120 h-120 bg-red-200">
         <div className="relative h-80 m-20 ">
           <PendulumContainer
-            isWaitingToStart={isWaitingToStart}
+            start={start}
             color="lightgreen"
             onReady={registerLeft}
             pendulumParams={{
@@ -110,7 +110,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
         </div>
         <div className="relative h-80 m-20">
           <PendulumContainer
-            isWaitingToStart={isWaitingToStart}
+            start={start}
             color="aquamarine"
             onReady={registerRight}
             pendulumParams={{
@@ -129,7 +129,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
           sx={{ mx: 3 }}
           variant="outlined"
           color="primary"
-          disabled={isWaitingToStart || hasAnswered}
+          disabled={start || hasAnswered}
           onClick={() => {
             sendAnswer(leftId.current, setIsAnswerCorrect);
             setHasAnswered(true);
@@ -142,7 +142,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
           sx={{ mx: 3 }}
           variant="outlined"
           color="primary"
-          disabled={isWaitingToStart || hasAnswered}
+          disabled={start || hasAnswered}
           onClick={() => {
             sendAnswer(rightId.current, setIsAnswerCorrect);
             setHasAnswered(true);
