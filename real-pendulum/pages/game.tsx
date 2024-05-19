@@ -75,6 +75,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [stats, setStats] = useState(0);
+  const [displayStats, setDisplayStats] = useState(false);
 
   const registerLeft = (id: string) => {
     leftId.current = id;
@@ -95,30 +96,32 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
 
   return (
     <div>
-      <div className="flex w-120 h-120 bg-red-200">
-        <div className="relative h-80 m-20 ">
-          <PendulumContainer
-            start={start}
-            color="lightgreen"
-            onReady={registerLeft}
-            pendulumParams={{
-              initialAngle: 0,
-              initialSpeed: 2,
-              pendulumType: PendulumType.ODE,
-            }}
-          />
-        </div>
-        <div className="relative h-80 m-20">
-          <PendulumContainer
-            start={start}
-            color="aquamarine"
-            onReady={registerRight}
-            pendulumParams={{
-              initialAngle: 0,
-              initialSpeed: 2,
-              pendulumType: PendulumType.Approximation,
-            }}
-          />
+      <div className="flex justify-center">
+        <div className="flex flex-row justify-between w-40 bg-red-200">
+          <div className="h-80">
+            <PendulumContainer
+              start={start}
+              color="lightgreen"
+              onReady={registerLeft}
+              pendulumParams={{
+                initialAngle: 0,
+                initialSpeed: 2,
+                pendulumType: PendulumType.ODE,
+              }}
+            />
+          </div>
+          <div className="h-80">
+            <PendulumContainer
+              start={start}
+              color="aquamarine"
+              onReady={registerRight}
+              pendulumParams={{
+                initialAngle: 0,
+                initialSpeed: 2,
+                pendulumType: PendulumType.Approximation,
+              }}
+            />
+          </div>
         </div>
       </div>
       <div className="flex text-black justify-center bg-green-300">
@@ -129,11 +132,12 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
           sx={{ mx: 3 }}
           variant="outlined"
           color="primary"
-          disabled={start || hasAnswered}
+          disabled={!start || hasAnswered}
           onClick={() => {
             sendAnswer(leftId.current, setIsAnswerCorrect);
             setHasAnswered(true);
             getStats(setStats);
+            setDisplayStats(true);
           }}
         >
           {"left"}
@@ -142,11 +146,12 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
           sx={{ mx: 3 }}
           variant="outlined"
           color="primary"
-          disabled={start || hasAnswered}
+          disabled={!start || hasAnswered}
           onClick={() => {
             sendAnswer(rightId.current, setIsAnswerCorrect);
             setHasAnswered(true);
             getStats(setStats);
+            setDisplayStats(true);
           }}
         >
           {"right"}
@@ -161,7 +166,11 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
           You were wrong!
         </div>
       )}
-      <div className="flex text-black justify-center bg-blue-300 mb-16">
+      <div
+        className={`flex text-black justify-center bg-blue-300 mb-16 ${
+          displayStats ? "visible" : "invisible"
+        }`}
+      >
         {stats}% of the answers given by the players were correct.
       </div>
       <Button
