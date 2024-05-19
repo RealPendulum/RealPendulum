@@ -35,7 +35,6 @@ function Playground() {
           <div className="w-80 h-80" />
           <div className="h-80 w-80">
             <PendulumContainer
-              start={false}
               color="lightgreen"
               pendulumParams={{
                 initialAngle: initialAngle,
