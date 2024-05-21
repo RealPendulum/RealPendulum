@@ -98,6 +98,57 @@ export function PendulumContainer({
   return <Pendulum color={color} angle={angle} length={length ?? 1} />;
 }
 
+export function MyPendulumContainer({
+  start = true,
+  color,
+  onReady,
+  argData,
+}: {
+  start: boolean;
+  color: string;
+  onReady: (id: string) => void;
+  argData: Data | null;
+}) {
+  const [angle, setAngle] = useState(0);
+  const data = useRef<Data>({
+    id: "",
+    solution: { headLocation: [], loopLocation: [] },
+  });
+  const [isReady, setIsReady] = useState(false);
+  const job = useRef<{ job: number }>({ job: -1 });
+
+  useEffect(() => {
+    setIsReady(false);
+
+    if (argData !== null) {
+      data.current = argData;
+      onReady && onReady(data.current.id);
+      setIsReady(true);
+    }
+
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [onReady, argData]);
+
+  useEffect(() => {
+    if (start && isReady) {
+      job.current = startLoop(data.current.solution, setAngle);
+    }
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [start, isReady]);
+
+  return <Pendulum color={color} angle={angle} length={1} />;
+}
+
 interface PendulumContainerProps {
   start?: boolean;
   color: string;
@@ -208,7 +259,7 @@ function startLoop(
   }
 }
 
-type Data = {
+export type Data = {
   id: string;
   solution: Solution;
 };

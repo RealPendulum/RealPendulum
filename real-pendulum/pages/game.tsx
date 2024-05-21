@@ -1,7 +1,7 @@
 import Urls from "@/app/urls";
 import NavigationBar from "@/app/navigation";
-import { useRef, useState } from "react";
-import { PendulumContainer, PendulumType } from "@/app/pendulum";
+import { use, useCallback, useEffect, useRef, useState } from "react";
+import { Data, MyPendulumContainer, PendulumType } from "@/app/pendulum";
 import "@/app/globals.css";
 import { Button } from "@mui/material";
 import axios from "axios";
@@ -77,15 +77,15 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
   const [stats, setStats] = useState(0);
   const [displayStats, setDisplayStats] = useState(false);
 
-  const registerLeft = (id: string) => {
+  const registerLeft = useCallback((id: string) => {
     leftId.current = id;
     startAnimation();
-  };
+  }, []);
 
-  const registerRight = (id: string) => {
+  const registerRight = useCallback((id: string) => {
     rightId.current = id;
     startAnimation();
-  };
+  }, []);
 
   const startAnimation = () => {
     readyCount.current += 1;
@@ -94,32 +94,30 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
     }
   };
 
+  const [data, setData] = useState<TwoSolutions | null>(null);
+  useEffect(() => {
+    axios.get("http://localhost:5068/easy").then((response) => {
+      setData(response.data);
+    });
+  }, []);
   return (
     <div>
       <div className="flex justify-center">
         <div className="flex flex-row justify-between w-40 bg-red-200">
           <div className="h-80">
-            <PendulumContainer
+            <MyPendulumContainer
               start={start}
               color="lightgreen"
               onReady={registerLeft}
-              pendulumParams={{
-                initialAngle: 0,
-                initialSpeed: 2,
-                pendulumType: PendulumType.ODE,
-              }}
+              argData={data === null ? null : data.solution1}
             />
           </div>
           <div className="h-80">
-            <PendulumContainer
+            <MyPendulumContainer
               start={start}
               color="aquamarine"
               onReady={registerRight}
-              pendulumParams={{
-                initialAngle: 0,
-                initialSpeed: 2,
-                pendulumType: PendulumType.Approximation,
-              }}
+              argData={data === null ? null : data.solution2}
             />
           </div>
         </div>
@@ -224,4 +222,9 @@ function getStats(callback: (stats: number) => void) {
 interface DifficultyProps {
   currentSite: number;
   setCurrentSite: (site: number) => void;
+}
+
+interface TwoSolutions {
+  solution1: Data;
+  solution2: Data;
 }
