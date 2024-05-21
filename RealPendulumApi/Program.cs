@@ -48,6 +48,10 @@ app.MapGet("/stats", EndpointData.GetStats)
   .WithName("Get Game Statistics")
   .WithOpenApi();
 
+app.MapGet("/easy", EndpointData.Easy)
+  .WithName("Easy Difficulty")
+  .WithOpenApi();
+
 app.UseCors("AllowAnyOrigin");
 
 app.Run();
