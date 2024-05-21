@@ -3,14 +3,20 @@ static class Identificator
   static Dictionary<string, GameRecord> solutionsWithId =
     new Dictionary<string, GameRecord>();
 
-  public static string GenerateId(string solutionType)
+  public static string GenerateId(
+    string solutionType,
+    Difficulty? difficulty = null
+  )
   {
     string id = Guid.NewGuid().ToString().Substring(0, 16);
     while (solutionsWithId.ContainsKey(id))
     {
       id = Guid.NewGuid().ToString().Substring(0, 16);
     }
-    solutionsWithId.Add(id, new GameRecord { SolutionType = solutionType });
+    solutionsWithId.Add(
+      id,
+      new GameRecord { SolutionType = solutionType, Difficulty = difficulty }
+    );
     return id;
   }
 
@@ -37,13 +43,13 @@ static class Identificator
     return answer == "ode" || answer == "approx";
   }
 
-  public static double CalculateStats()
+  public static double CalculateStats(Difficulty difficulty)
   {
     double correct = 0;
     double total = 0;
     foreach (var solution in solutionsWithId.Values)
     {
-      if (solution.Answer != null)
+      if (solution.Answer != null && solution.Difficulty == difficulty)
       {
         total++;
         if (solution.SolutionType == solution.Answer)
@@ -57,7 +63,7 @@ static class Identificator
     {
       return 0;
     }
-    return correct / total * 100;
+    return correct / total;
   }
 }
 
@@ -65,4 +71,12 @@ record GameRecord
 {
   public required string SolutionType { get; set; }
   public string? Answer { get; set; }
+  public Difficulty? Difficulty { get; set; }
+}
+
+enum Difficulty
+{
+  Easy,
+  Medium,
+  Hard
 }
