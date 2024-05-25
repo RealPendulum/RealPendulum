@@ -12,7 +12,6 @@ export default function NavigationBar({
       <div className="flex flex-row justify-center p-3">
         {[
           ["Home", Urls.homeURL],
-          ["Info", Urls.infoURL],
           ["Game", Urls.gameURL],
           ["Playground", Urls.examplesURL],
           ["Contact", Urls.contactURL],
