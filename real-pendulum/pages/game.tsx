@@ -6,12 +6,12 @@ import "@/app/globals.css";
 
 export default function Game() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <NavigationBar currentSiteUrl={Urls.gameURL} />
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-5">
         <ThreePendulums />
       </div>
-    </div>
+    </>
   );
 }
 

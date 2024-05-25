@@ -18,7 +18,7 @@ export function PendulumContainer({
     initialAngle,
     initialSpeed,
     pendulumType,
-    length,
+    length = 1,
     acceleration,
   },
   ballDiameter = 48,
@@ -91,7 +91,7 @@ export function PendulumContainer({
     <Pendulum
       color={color}
       angle={angle}
-      length={length ?? 1}
+      length={length}
       ballDiameter={ballDiameter}
     />
   );

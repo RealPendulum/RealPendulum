@@ -8,10 +8,10 @@ import Urls from "@/app/urls";
 
 export default function Examples() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <NavigationBar currentSiteUrl={Urls.examplesURL} />
       <Playground />
-    </div>
+    </>
   );
 }
 
@@ -26,7 +26,7 @@ function Playground() {
 
   return (
     <div className="flex flex-row justify-center">
-      <div className="flex flex-col bg-blue-300">
+      <div className="flex flex-col">
         <div className="flex flex-row">
           <div className="w-80 h-80" />
           <div className="w-80 h-80" />
@@ -47,7 +47,7 @@ function Playground() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col justify-evenly w-96 bg-slate-200 p-8 ">
+      <div className="flex flex-col justify-evenly w-96 bg-white p-8 rounded border-black border-2 bg-opacity-25 m-5">
         <LabeledSlider
           label="Initial angle"
           defaultValue={initialAngle}
@@ -100,7 +100,7 @@ function Playground() {
           label="Length"
           defaultValue={length}
           min={0.01}
-          max={10}
+          max={2}
           step={0.01}
           marks={[
             {
@@ -115,8 +115,8 @@ function Playground() {
         <LabeledSlider
           label="Acceleration"
           defaultValue={acceleration}
-          min={-100}
-          max={100}
+          min={-20}
+          max={20}
           step={0.01}
           marks={[
             {

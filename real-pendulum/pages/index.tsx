@@ -16,26 +16,20 @@ export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const Slide = Slides[currentSlide];
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col ">
+    <div>
       <NavigationBar currentSiteUrl={Urls.homeURL} />
-      <div className="flex-grow overflow-auto bg-gradient-to-br from-green-100 to-blue-200 transform">
-        <div className="container center mx-auto p-5">
-          <Slide setCurrentSlide={setCurrentSlide} />
-        </div>
+      <div className="overflow-auto mb-[200px]">
+        <Slide setCurrentSlide={setCurrentSlide} />
       </div>
-      <div className="p-5">
-        <div className="container mx-auto p-5">
-          <div className="flex flex-col gap-4">
-            <NavigationArrows
-              currentSlide={currentSlide}
-              setCurrentSlide={setCurrentSlide}
-            />
-            <NavigationPanel
-              currentSlide={currentSlide}
-              setCurrentSlide={setCurrentSlide}
-            />
-          </div>
-        </div>
+      <div className="fixed bg-white bottom-0">
+        <NavigationArrows
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+        />
+        <NavigationPanel
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+        />
       </div>
     </div>
   );
@@ -60,39 +54,9 @@ const Slides: Slide[] = [
   Slide15,
 ];
 
-function NavigationPanel({ currentSlide, setCurrentSlide }: NavigationProps) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="flex flex-row items-center justify-center">
-        {Slides.map((_slide, index) =>
-          index <= currentSlide ? (
-            <Button
-              key={index}
-              color="primary"
-              size="small"
-              onClick={() => setCurrentSlide(index)}
-            >
-              <Circle />
-            </Button>
-          ) : (
-            <Button
-              key={index}
-              color="primary"
-              size="small"
-              onClick={() => setCurrentSlide(index)}
-            >
-              <CircleOutlined />
-            </Button>
-          )
-        )}
-      </div>
-    </div>
-  );
-}
-
 function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
   return (
-    <div className="text-center">
+    <div className="text-center m-5">
       {currentSlide >= 1 && (
         <Button
           variant="outlined"
@@ -110,6 +74,34 @@ function NavigationArrows({ currentSlide, setCurrentSlide }: NavigationProps) {
         >
           <ArrowForwardIos />
         </Button>
+      )}
+    </div>
+  );
+}
+
+function NavigationPanel({ currentSlide, setCurrentSlide }: NavigationProps) {
+  return (
+    <div className="flex flex-row w-[100vw] justify-center overflow-scroll m-5">
+      {Slides.map((_slide, index) =>
+        index <= currentSlide ? (
+          <Button
+            key={index}
+            color="primary"
+            size="small"
+            onClick={() => setCurrentSlide(index)}
+          >
+            <Circle />
+          </Button>
+        ) : (
+          <Button
+            key={index}
+            color="primary"
+            size="small"
+            onClick={() => setCurrentSlide(index)}
+          >
+            <CircleOutlined />
+          </Button>
+        )
       )}
     </div>
   );
@@ -150,7 +142,7 @@ function ThreePendulums() {
   }, []);
 
   return (
-    <div className="w-80 h-80">
+    <div className="relative w-80 h-80">
       <div className="absolute left-1/2">
         <PendulumContainer
           start={start}
