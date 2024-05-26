@@ -57,7 +57,7 @@ export function PendulumContainer({
       .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
       .then((response) => {
         data.current = response.data;
-        onReady && onReady();
+        onReady && onReady(data.current.id);
         setIsReady(true);
       })
       .catch((error) => {
@@ -97,10 +97,72 @@ export function PendulumContainer({
   );
 }
 
+export function MyPendulumContainer({
+  start = true,
+  color,
+  onReady,
+  argData,
+  initialAngle,
+  ballDiameter = 48,
+}: {
+  start: boolean;
+  color: string;
+  onReady: (id: string) => void;
+  argData: Data | null;
+  initialAngle: number;
+  ballDiameter?: number;
+}) {
+  const [angle, setAngle] = useState(initialAngle);
+  const data = useRef<Data>({
+    id: "",
+    solution: { headLocation: [], loopLocation: [] },
+  });
+  const [isReady, setIsReady] = useState(false);
+  const job = useRef<{ job: number }>({ job: -1 });
+
+  useEffect(() => {
+    setIsReady(false);
+
+    if (argData !== null) {
+      data.current = argData;
+      onReady && onReady(data.current.id);
+      setIsReady(true);
+    }
+
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [onReady, argData]);
+
+  useEffect(() => {
+    if (start && isReady) {
+      job.current = startLoop(data.current.solution, setAngle);
+    }
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [start, isReady]);
+
+  return (
+    <Pendulum
+      color={color}
+      angle={angle}
+      length={1}
+      ballDiameter={ballDiameter}
+    />
+  );
+}
+
 interface PendulumContainerProps {
   start?: boolean;
   color: string;
-  onReady?: () => void;
+  onReady?: (id: string) => void;
   pendulumParams: PendulumParams;
   ballDiameter?: number;
 }
@@ -211,7 +273,7 @@ function startLoop(
   }
 }
 
-type Data = {
+export type Data = {
   id: string;
   solution: Solution;
 };

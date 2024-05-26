@@ -44,6 +44,22 @@ app.MapGet("/result", EndpointData.CheckAnswer)
   .WithName("Check Player Answer Correctness")
   .WithOpenApi();
 
+app.MapGet("/stats", EndpointData.GetStats)
+  .WithName("Get Game Statistics")
+  .WithOpenApi();
+
+app.MapGet("/easy", EndpointData.Easy)
+  .WithName("Easy Difficulty")
+  .WithOpenApi();
+
+app.MapGet("/medium", EndpointData.Medium)
+  .WithName("Medium Difficulty")
+  .WithOpenApi();
+
+app.MapGet("/hard", EndpointData.Hard)
+  .WithName("Hard Difficulty")
+  .WithOpenApi();
+
 app.UseCors("AllowAnyOrigin");
 
 app.Run();
