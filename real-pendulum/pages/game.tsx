@@ -8,27 +8,28 @@ import axios from "axios";
 
 export default function Game() {
   const [currentSite, setCurrentSite] = useState(0);
-  const { Site } = GameSites[currentSite];
+
+  const Site = GameSites[currentSite];
   return (
     <>
       <NavigationBar currentSiteUrl={Urls.gameURL} />
       <div className="flex justify-center">
-        <Site currentSite={currentSite} setCurrentSite={setCurrentSite} />
+        <Site
+          currentSite={currentSite}
+          setCurrentSite={setCurrentSite}
+          level=""
+        />
       </div>
     </>
   );
 }
 
-const GameSites: Site[] = [{ Site: Difficulty }, { Site: TwoPendulums }];
-interface Site {
-  Site: React.FC<DifficultyProps>;
-}
+const GameSites: React.FC<DifficultyProps>[] = [Difficulty, Easy, Medium, Hard];
 
-function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
+function Difficulty({ currentSite, setCurrentSite, level }: DifficultyProps) {
   return (
     <>
       <div className="flex flex-row">
-        {/* <div className="flex justify-center"> */}
         <div className="flex-1 grow-1 px-[10vw] py-[12vh]">
           <div className="flex justify-center text-black text-2xl">
             Difficulty
@@ -38,7 +39,6 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
               sx={{ mx: 3 }}
               variant="outlined"
               color="primary"
-              // disabled={isWaitingToStart || hasAnswered}
               onClick={() => setCurrentSite(1)}
             >
               {"easy"}
@@ -47,9 +47,7 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
               sx={{ mx: 3 }}
               variant="outlined"
               color="primary"
-              // disabled={isWaitingToStart || hasAnswered}
-              // onClick={() => {
-              // }}
+              onClick={() => setCurrentSite(2)}
             >
               {"medium"}
             </Button>
@@ -57,9 +55,7 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
               sx={{ mx: 3 }}
               variant="outlined"
               color="primary"
-              // disabled={isWaitingToStart || hasAnswered}
-              // onClick={() => {
-              // }}
+              onClick={() => setCurrentSite(3)}
             >
               {"hard"}
             </Button>
@@ -79,7 +75,39 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
   );
 }
 
-export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
+function Easy({ setCurrentSite }: { setCurrentSite: (site: number) => void }) {
+  return TwoPendulums({
+    currentSite: 1,
+    setCurrentSite: setCurrentSite,
+    level: "easy",
+  });
+}
+
+function Medium({
+  setCurrentSite,
+}: {
+  setCurrentSite: (site: number) => void;
+}) {
+  return TwoPendulums({
+    currentSite: 2,
+    setCurrentSite: setCurrentSite,
+    level: "medium",
+  });
+}
+
+function Hard({ setCurrentSite }: { setCurrentSite: (site: number) => void }) {
+  return TwoPendulums({
+    currentSite: 3,
+    setCurrentSite: setCurrentSite,
+    level: "hard",
+  });
+}
+
+export function TwoPendulums({
+  currentSite,
+  setCurrentSite,
+  level,
+}: DifficultyProps) {
   const [start, setStart] = useState(false);
   const readyCount = useRef(0);
   const leftId = useRef("");
@@ -109,7 +137,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
 
   const [data, setData] = useState<TwoSolutions | null>(null);
   useEffect(() => {
-    axios.get("http://localhost:5068/easy").then((response) => {
+    axios.get(`http://localhost:5068/${level}`).then((response) => {
       setData(response.data);
     });
   }, [playCount]);
@@ -148,7 +176,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
             onClick={() => {
               sendAnswer(leftId.current, setIsAnswerCorrect);
               setHasAnswered(true);
-              getStats(setStats);
+              getStats(level, setStats);
               setDisplayStats(true);
             }}
           >
@@ -162,7 +190,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
             onClick={() => {
               sendAnswer(rightId.current, setIsAnswerCorrect);
               setHasAnswered(true);
-              getStats(setStats);
+              getStats(level, setStats);
               setDisplayStats(true);
             }}
           >
@@ -208,7 +236,7 @@ export function TwoPendulums({ currentSite, setCurrentSite }: DifficultyProps) {
             style={{ color: "white" }}
             disabled={!hasAnswered}
             onClick={() => {
-              setCurrentSite(1);
+              setCurrentSite(currentSite);
               setStart(false);
               readyCount.current = 0;
               leftId.current = "";
@@ -234,7 +262,6 @@ function sendAnswer(id: string, callback: (isAnswerCorrect: boolean) => void) {
   axios
     .get(`http://localhost:5068/result?${queryParam}`)
     .then((response) => {
-      console.log(response.data);
       const isAnswerCorrect = isCorrectAnswer(response.data);
       callback(isAnswerCorrect);
     })
@@ -247,11 +274,10 @@ function isCorrectAnswer(data: string | { message: string }) {
   return typeof data === "string";
 }
 
-function getStats(callback: (stats: number) => void) {
+function getStats(level: string, callback: (stats: number) => void) {
   axios
-    .get(`http://localhost:5068/stats?difficulty=Easy`)
+    .get(`http://localhost:5068/stats?difficulty=${capitalize(level)}`)
     .then((response) => {
-      console.log(response.data);
       const stats = response.data;
       callback(Number(Number(stats * 100).toFixed(2)));
     })
@@ -260,9 +286,15 @@ function getStats(callback: (stats: number) => void) {
     });
 }
 
+function capitalize(str: string) {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 interface DifficultyProps {
   currentSite: number;
   setCurrentSite: (site: number) => void;
+  level: string;
 }
 
 interface TwoSolutions {

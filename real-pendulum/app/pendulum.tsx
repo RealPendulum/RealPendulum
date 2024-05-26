@@ -102,11 +102,13 @@ export function MyPendulumContainer({
   color,
   onReady,
   argData,
+  ballDiameter = 48,
 }: {
   start: boolean;
   color: string;
   onReady: (id: string) => void;
   argData: Data | null;
+  ballDiameter?: number;
 }) {
   const [angle, setAngle] = useState(0);
   const data = useRef<Data>({
@@ -145,7 +147,14 @@ export function MyPendulumContainer({
     };
   }, [start, isReady]);
 
-  return <Pendulum color={color} angle={angle} length={1} />;
+  return (
+    <Pendulum
+      color={color}
+      angle={angle}
+      length={1}
+      ballDiameter={ballDiameter}
+    />
+  );
 }
 
 interface PendulumContainerProps {
