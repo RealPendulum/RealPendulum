@@ -58,7 +58,7 @@ public class OdeSolver
   {
     int leftToRightPasses = 0;
     int loopStart = -1;
-    const int MAGIC_NUMBER = 2048;
+    const int MAGIC_NUMBER = 16384;
     var array = new Vector<double>[MAGIC_NUMBER];
     double current = 0;
     array[0] = y0;
@@ -139,7 +139,7 @@ public class AnalyticSolver
 
     int passes = 0;
     int loopStart = -1;
-    const int MAGIC_NUMBER = 2048;
+    const int MAGIC_NUMBER = 16384;
     int length = 1;
 
     while (length < MAGIC_NUMBER && passes < 2)

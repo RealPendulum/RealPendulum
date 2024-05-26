@@ -1,4 +1,4 @@
-import { Slider } from "@mui/material";
+import { FormControlLabel, Slider, Switch } from "@mui/material";
 import "@/app/globals.css";
 import { PendulumContainer, PendulumType } from "@/app/pendulum";
 import { useState } from "react";
@@ -73,29 +73,25 @@ function Playground() {
           max={10}
           step={0.01}
           valueLabelDisplay="on"
+          marks={[{ value: 0, label: "0" }]}
           valueLabelFormat={(value) => `${value.toFixed(2)}m/s`}
           onChangeCommitted={(_event, value) =>
             setInitialVelocity(value as number)
           }
         />
-        <LabeledSlider
-          label="Solution type"
-          defaultValue={0}
-          min={0}
-          max={1}
-          step={null}
-          marks={[
-            { value: 0, label: "ODE" },
-            { value: 1, label: "Approx" },
-          ]}
-          valueLabelDisplay="on"
-          valueLabelFormat={(value) => `${value === 0 ? "ODE" : "Approx"}`}
-          onChangeCommitted={(_event, value) =>
-            setPendulumType(
-              value === 0 ? PendulumType.ODE : PendulumType.Approximation
-            )
-          }
-        />
+        <div className="flex flex-row justify-between items-center">
+          Approximation
+          <Switch
+            defaultChecked={true}
+            onChange={(_event, value) =>
+              setPendulumType(
+                value ? PendulumType.ODE : PendulumType.Approximation
+              )
+            }
+          />
+          ODE
+        </div>
+
         <LabeledSlider
           label="Length"
           defaultValue={length}
@@ -115,13 +111,21 @@ function Playground() {
         <LabeledSlider
           label="Acceleration"
           defaultValue={acceleration}
-          min={-20}
-          max={20}
+          min={-1}
+          max={25}
           step={0.01}
           marks={[
             {
+              label: "Earth",
               value: 9.81,
-              label: "9.81m/s²",
+            },
+            {
+              label: "Mars",
+              value: 3.7,
+            },
+            {
+              label: "Jupiter",
+              value: 24.7,
             },
           ]}
           valueLabelDisplay="on"
