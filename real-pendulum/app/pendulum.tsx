@@ -102,15 +102,17 @@ export function MyPendulumContainer({
   color,
   onReady,
   argData,
+  initialAngle,
   ballDiameter = 48,
 }: {
   start: boolean;
   color: string;
   onReady: (id: string) => void;
   argData: Data | null;
+  initialAngle: number;
   ballDiameter?: number;
 }) {
-  const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState(initialAngle);
   const data = useRef<Data>({
     id: "",
     solution: { headLocation: [], loopLocation: [] },

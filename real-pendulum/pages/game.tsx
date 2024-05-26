@@ -8,25 +8,20 @@ import axios from "axios";
 
 export default function Game() {
   const [currentSite, setCurrentSite] = useState(0);
-
   const Site = GameSites[currentSite];
   return (
     <>
       <NavigationBar currentSiteUrl={Urls.gameURL} />
       <div className="flex justify-center">
-        <Site
-          currentSite={currentSite}
-          setCurrentSite={setCurrentSite}
-          level=""
-        />
+        <Site currentSite={currentSite} setCurrentSite={setCurrentSite} />
       </div>
     </>
   );
 }
 
-const GameSites: React.FC<DifficultyProps>[] = [Difficulty, Easy, Medium, Hard];
+const GameSites: React.FC<LevelProps>[] = [Difficulty, Easy, Medium, Hard];
 
-function Difficulty({ currentSite, setCurrentSite, level }: DifficultyProps) {
+function Difficulty({ currentSite, setCurrentSite }: LevelProps) {
   return (
     <>
       <div className="flex flex-row">
@@ -80,6 +75,7 @@ function Easy({ setCurrentSite }: { setCurrentSite: (site: number) => void }) {
     currentSite: 1,
     setCurrentSite: setCurrentSite,
     level: "easy",
+    initialAngle: 1.5,
   });
 }
 
@@ -92,6 +88,7 @@ function Medium({
     currentSite: 2,
     setCurrentSite: setCurrentSite,
     level: "medium",
+    initialAngle: 1,
   });
 }
 
@@ -100,6 +97,7 @@ function Hard({ setCurrentSite }: { setCurrentSite: (site: number) => void }) {
     currentSite: 3,
     setCurrentSite: setCurrentSite,
     level: "hard",
+    initialAngle: 0.5,
   });
 }
 
@@ -107,6 +105,7 @@ export function TwoPendulums({
   currentSite,
   setCurrentSite,
   level,
+  initialAngle,
 }: DifficultyProps) {
   const [start, setStart] = useState(false);
   const readyCount = useRef(0);
@@ -114,8 +113,7 @@ export function TwoPendulums({
   const rightId = useRef("");
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
-  const [stats, setStats] = useState(0);
-  const [displayStats, setDisplayStats] = useState(false);
+  const [stats, setStats] = useState(-1);
   const [playCount, setPlayCount] = useState(0);
 
   const registerLeft = useCallback((id: string) => {
@@ -137,9 +135,12 @@ export function TwoPendulums({
 
   const [data, setData] = useState<TwoSolutions | null>(null);
   useEffect(() => {
-    axios.get(`http://localhost:5068/${level}`).then((response) => {
-      setData(response.data);
-    });
+    axios
+      .get(`http://localhost:5068/${level}`)
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch(() => {});
   }, [playCount]);
   return (
     <div className="grid grid-cols-3 gap-4 py-[6vh] w-[60vw]">
@@ -152,6 +153,7 @@ export function TwoPendulums({
                 color="lightgreen"
                 onReady={registerLeft}
                 argData={data === null ? null : data.solution1}
+                initialAngle={initialAngle}
               />
             </div>
             <div className="h-80">
@@ -160,6 +162,7 @@ export function TwoPendulums({
                 color="aquamarine"
                 onReady={registerRight}
                 argData={data === null ? null : data.solution2}
+                initialAngle={initialAngle}
               />
             </div>
           </div>
@@ -174,10 +177,8 @@ export function TwoPendulums({
             color="primary"
             disabled={!start || hasAnswered}
             onClick={() => {
-              sendAnswer(leftId.current, setIsAnswerCorrect);
+              sendAnswer(leftId.current, level, setStats, setIsAnswerCorrect);
               setHasAnswered(true);
-              getStats(level, setStats);
-              setDisplayStats(true);
             }}
           >
             {"left"}
@@ -188,10 +189,8 @@ export function TwoPendulums({
             color="primary"
             disabled={!start || hasAnswered}
             onClick={() => {
-              sendAnswer(rightId.current, setIsAnswerCorrect);
+              sendAnswer(rightId.current, level, setStats, setIsAnswerCorrect);
               setHasAnswered(true);
-              getStats(level, setStats);
-              setDisplayStats(true);
             }}
           >
             {"right"}
@@ -204,7 +203,7 @@ export function TwoPendulums({
         )}
         <div
           className={`flex text-black justify-center mb-6 text-wrap ${
-            displayStats ? "visible" : "invisible"
+            stats >= 0 ? "visible" : "invisible"
           }`}
         >
           {stats}% of the answers given by the players were correct.
@@ -243,8 +242,7 @@ export function TwoPendulums({
               rightId.current = "";
               setIsAnswerCorrect(null);
               setHasAnswered(false);
-              setStats(0);
-              setDisplayStats(false);
+              setStats(-1);
               setPlayCount(playCount + 1);
             }}
           >
@@ -256,14 +254,19 @@ export function TwoPendulums({
   );
 }
 
-function sendAnswer(id: string, callback: (isAnswerCorrect: boolean) => void) {
+function sendAnswer(
+  id: string,
+  level: string,
+  setter: (stats: number) => void,
+  callback: (isAnswerCorrect: boolean) => void
+) {
   const queryParam = `id=${id}&answer=ode`;
-  console.log(id);
   axios
     .get(`http://localhost:5068/result?${queryParam}`)
     .then((response) => {
       const isAnswerCorrect = isCorrectAnswer(response.data);
       callback(isAnswerCorrect);
+      getStats(level, setter);
     })
     .catch((error) => {
       console.log(error);
@@ -295,6 +298,12 @@ interface DifficultyProps {
   currentSite: number;
   setCurrentSite: (site: number) => void;
   level: string;
+  initialAngle: number;
+}
+
+interface LevelProps {
+  currentSite: number;
+  setCurrentSite: (site: number) => void;
 }
 
 interface TwoSolutions {

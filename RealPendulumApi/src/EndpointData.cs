@@ -129,7 +129,7 @@ static class EndpointData
     double duration = _duration;
     double acceleration = _acceleration;
     double length = _length;
-    double initialAngle = _initialAngle;
+    double initialAngle = 1.5;
     double initialSpeed = _initialSpeed;
 
     var solutionOde = OdeSolver.Solve(
@@ -166,6 +166,118 @@ static class EndpointData
     var Solution2 = new SolutionWithId
     {
       Id = Identificator.GenerateId("approx", Difficulty.Easy),
+      Solution = solutionAnalytic,
+    };
+
+    var random = new Random();
+    var rand = random.Next(0, 2);
+    return (
+      new TwoSolutions
+      {
+        Solution1 = rand == 0 ? Solution1 : Solution2,
+        Solution2 = rand == 0 ? Solution2 : Solution1
+      }
+    );
+  }
+
+  public static TwoSolutions Medium(double timeStep = _timeStep)
+  {
+    double duration = _duration;
+    double acceleration = _acceleration;
+    double length = _length;
+    double initialAngle = 1;
+    double initialSpeed = _initialSpeed;
+
+    var solutionOde = OdeSolver.Solve(
+      new Parameters
+      {
+        Duration = duration,
+        TimeStep = timeStep,
+        Acceleration = acceleration,
+        Length = length,
+        InitialAngle = initialAngle,
+        InitialLinearVelocity = initialSpeed,
+        IsExact = true
+      }
+    );
+
+    var solutionAnalytic = AnalyticSolver.Solve(
+      new Parameters
+      {
+        Duration = duration,
+        TimeStep = timeStep,
+        Acceleration = acceleration,
+        Length = length,
+        InitialAngle = initialAngle,
+        InitialLinearVelocity = initialSpeed,
+        IsExact = false
+      }
+    );
+
+    var Solution1 = new SolutionWithId
+    {
+      Id = Identificator.GenerateId("ode", Difficulty.Medium),
+      Solution = solutionOde,
+    };
+    var Solution2 = new SolutionWithId
+    {
+      Id = Identificator.GenerateId("approx", Difficulty.Medium),
+      Solution = solutionAnalytic,
+    };
+
+    var random = new Random();
+    var rand = random.Next(0, 2);
+    return (
+      new TwoSolutions
+      {
+        Solution1 = rand == 0 ? Solution1 : Solution2,
+        Solution2 = rand == 0 ? Solution2 : Solution1
+      }
+    );
+  }
+
+  public static TwoSolutions Hard(double timeStep = _timeStep)
+  {
+    double duration = _duration;
+    double acceleration = _acceleration;
+    double length = _length;
+    double initialAngle = 0.5;
+    double initialSpeed = _initialSpeed;
+
+    var solutionOde = OdeSolver.Solve(
+      new Parameters
+      {
+        Duration = duration,
+        TimeStep = timeStep,
+        Acceleration = acceleration,
+        Length = length,
+        InitialAngle = initialAngle,
+        InitialLinearVelocity = initialSpeed,
+        IsExact = true
+      }
+    );
+
+    var solutionAnalytic = AnalyticSolver.Solve(
+      new Parameters
+      {
+        Duration = duration,
+        TimeStep = timeStep,
+        Acceleration = acceleration,
+        Length = length,
+        InitialAngle = initialAngle,
+        InitialLinearVelocity = initialSpeed,
+        IsExact = false
+      }
+    );
+
+    var Solution1 = new SolutionWithId
+    {
+      Id = Identificator.GenerateId("ode", Difficulty.Hard),
+      Solution = solutionOde,
+    };
+    var Solution2 = new SolutionWithId
+    {
+      Id = Identificator.GenerateId("approx", Difficulty.Hard),
       Solution = solutionAnalytic,
     };
 

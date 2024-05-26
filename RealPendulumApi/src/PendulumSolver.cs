@@ -201,14 +201,14 @@ public class AnalyticSolver
     else if (Params.InitialAngle == 0)
     {
       PhaseShift = 0;
-      Amplitude = InitialAngularVelocity / Omega;
+      Amplitude = -InitialAngularVelocity / Omega;
     }
     else
     {
       PhaseShift = Math.Atan(
-        Params.InitialAngle * Omega / InitialAngularVelocity
+        -InitialAngularVelocity / Omega / Params.InitialAngle
       );
-      Amplitude = InitialAngularVelocity / Omega / Math.Sin(PhaseShift);
+      Amplitude = Params.InitialAngle / Math.Cos(PhaseShift);
     }
   }
 
