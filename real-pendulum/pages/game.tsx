@@ -10,16 +10,12 @@ export default function Game() {
   const [currentSite, setCurrentSite] = useState(0);
   const { Site } = GameSites[currentSite];
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <NavigationBar currentSiteUrl={Urls.gameURL} />
-      <div className="flex justify-center bg-gradient-to-br from-green-100 to-blue-200">
+      <div className="flex justify-center">
         <Site currentSite={currentSite} setCurrentSite={setCurrentSite} />
       </div>
-      {/* <Difficulty currentSite={currentSite} setCurrentSite={setCurrentSite} /> */}
-      {/* <div className="flex justify-center">
-        <TwoPendulums />
-      </div> */}
-    </div>
+    </>
   );
 }
 
@@ -30,7 +26,7 @@ interface Site {
 
 function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
   return (
-    <div>
+    <>
       <div className="flex flex-row">
         {/* <div className="flex justify-center"> */}
         <div className="flex-1 grow-1 px-[10vw] py-[12vh]">
@@ -79,7 +75,7 @@ function Difficulty({ currentSite, setCurrentSite }: DifficultyProps) {
           culpa qui officia deserunt mollit anim id est laborum."
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

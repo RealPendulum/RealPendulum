@@ -7,7 +7,8 @@ import {
   type Dispatch,
 } from "react";
 import axios from "axios";
-import { getFrameDuration } from "./framerate";
+
+const POINT_FRAME_DURATION = 2;
 
 export function PendulumContainer({
   start = true,
@@ -17,9 +18,10 @@ export function PendulumContainer({
     initialAngle,
     initialSpeed,
     pendulumType,
-    length,
+    length = 1,
     acceleration,
   },
+  ballDiameter = 48,
 }: PendulumContainerProps) {
   const [angle, setAngle] = useState(initialAngle);
   const data = useRef<Data>({
@@ -28,41 +30,31 @@ export function PendulumContainer({
   });
   const [isReady, setIsReady] = useState(false);
   const job = useRef<{ job: number }>({ job: -1 });
-  const frameDuration = useRef<number>(-1);
 
   useEffect(() => {
     setIsReady(false);
-    const timeStepRequest =
-      frameDuration.current == -1
-        ? getFrameDuration()
-        : Promise.resolve(frameDuration.current);
 
-    timeStepRequest
-      .then((timeStepValue) => {
-        frameDuration.current = timeStepValue;
-        const timeStep = Math.round(timeStepValue / 2);
-        const endpoint =
-          pendulumType == PendulumType.ODE
-            ? "ode"
-            : pendulumType == PendulumType.Approximation
-            ? "approx"
-            : pendulumType == PendulumType.Random
-            ? "random"
-            : "ode";
-        let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+    const timeStep = POINT_FRAME_DURATION;
+    const endpoint =
+      pendulumType == PendulumType.ODE
+        ? "ode"
+        : pendulumType == PendulumType.Approximation
+        ? "approx"
+        : pendulumType == PendulumType.Random
+        ? "random"
+        : "ode";
+    let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
 
-        if (length !== undefined) {
-          queryParam += `&length=${length}`;
-        }
+    if (length !== undefined) {
+      queryParam += `&length=${length}`;
+    }
 
-        if (acceleration !== undefined) {
-          queryParam += `&acceleration=${acceleration}`;
-        }
+    if (acceleration !== undefined) {
+      queryParam += `&acceleration=${acceleration}`;
+    }
 
-        return axios.get(
-          `http://localhost:5068/pendulum/${endpoint}?${queryParam}`
-        );
-      })
+    axios
+      .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
       .then((response) => {
         data.current = response.data;
         onReady && onReady(data.current.id);
@@ -95,7 +87,14 @@ export function PendulumContainer({
     };
   }, [start, isReady]);
 
-  return <Pendulum color={color} angle={angle} length={length ?? 1} />;
+  return (
+    <Pendulum
+      color={color}
+      angle={angle}
+      length={length}
+      ballDiameter={ballDiameter}
+    />
+  );
 }
 
 export function MyPendulumContainer({
@@ -154,6 +153,7 @@ interface PendulumContainerProps {
   color: string;
   onReady?: (id: string) => void;
   pendulumParams: PendulumParams;
+  ballDiameter?: number;
 }
 
 interface PendulumParams {
@@ -164,7 +164,7 @@ interface PendulumParams {
   acceleration?: number;
 }
 
-function Pendulum({ color, angle, length }: PendulumProps) {
+function Pendulum({ color, angle, length, ballDiameter }: PendulumProps) {
   return (
     <div
       style={{
@@ -189,8 +189,10 @@ function Pendulum({ color, angle, length }: PendulumProps) {
       <div
         style={{
           backgroundColor: color,
+          width: `${ballDiameter}px`,
+          height: `${ballDiameter}px`,
         }}
-        className="w-12 h-12 rounded-full bg-black border-4 border-black transform -translate-x-1/2 -translate-y-1/2"
+        className="rounded-full bg-black border-4 border-black transform -translate-x-1/2 -translate-y-1/2"
       />
     </div>
   );
@@ -200,6 +202,7 @@ interface PendulumProps {
   color: string;
   angle: number;
   length?: number;
+  ballDiameter: number;
 }
 
 function startLoop(
