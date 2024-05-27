@@ -5,6 +5,7 @@ import {
   useState,
   type SetStateAction,
   type Dispatch,
+  type ReactNode,
 } from "react";
 import axios from "axios";
 
@@ -159,6 +160,99 @@ export function MyPendulumContainer({
   );
 }
 
+export function DrawnPendulumContainer({
+  start = true,
+  onReady,
+  pendulumParams: {
+    initialAngle,
+    initialSpeed,
+    pendulumType,
+    length = 1,
+    acceleration,
+  },
+  animatedChild,
+  staticChild,
+  width,
+  height,
+  transformOrigin,
+}: DrawnPendulumContainerProps) {
+  const [angle, setAngle] = useState(initialAngle);
+  const data = useRef<Data>({
+    id: "",
+    solution: { headLocation: [], loopLocation: [] },
+  });
+  const [isReady, setIsReady] = useState(false);
+  const job = useRef<{ job: number }>({ job: -1 });
+
+  useEffect(() => {
+    setIsReady(false);
+
+    const timeStep = POINT_FRAME_DURATION;
+    const endpoint =
+      pendulumType == PendulumType.ODE
+        ? "ode"
+        : pendulumType == PendulumType.Approximation
+        ? "approx"
+        : pendulumType == PendulumType.Random
+        ? "random"
+        : "ode";
+    let queryParam = `initialAngle=${initialAngle}&initialSpeed=${initialSpeed}&timeStep=${timeStep}`;
+
+    if (length !== undefined) {
+      queryParam += `&length=${length}`;
+    }
+
+    if (acceleration !== undefined) {
+      queryParam += `&acceleration=${acceleration}`;
+    }
+
+    axios
+      .get(`http://localhost:5068/pendulum/${endpoint}?${queryParam}`)
+      .then((response) => {
+        data.current = response.data;
+        onReady && onReady(data.current.id);
+        setIsReady(true);
+      })
+      .catch((error) => {
+        console.error(
+          "Failed to fetch pendulum data or to get frame duration",
+          error
+        );
+      });
+
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [onReady, initialAngle, initialSpeed, pendulumType, length, acceleration]);
+
+  useEffect(() => {
+    if (start && isReady) {
+      job.current = startLoop(data.current.solution, setAngle);
+    }
+    return () => {
+      const jobNumber = job.current.job;
+      if (jobNumber != -1) {
+        cancelAnimationFrame(jobNumber);
+      }
+    };
+  }, [start, isReady]);
+
+  return (
+    <DrawnPendulum
+      angle={angle}
+      length={length}
+      animatedChild={animatedChild}
+      staticChild={staticChild}
+      width={width}
+      height={height}
+      transformOrigin={transformOrigin}
+    />
+  );
+}
+
 interface PendulumContainerProps {
   start?: boolean;
   color: string;
@@ -173,6 +267,18 @@ interface PendulumParams {
   pendulumType: PendulumType;
   length?: number;
   acceleration?: number;
+}
+
+interface DrawnPendulumContainerProps {
+  start?: boolean;
+  onReady?: (id: string) => void;
+  pendulumParams: PendulumParams;
+  animatedChild: ReactNode;
+  staticChild: ReactNode;
+  ballDiameter?: number;
+  width: number;
+  height: number;
+  transformOrigin?: string;
 }
 
 function Pendulum({ color, angle, length, ballDiameter }: PendulumProps) {
@@ -207,6 +313,41 @@ function Pendulum({ color, angle, length, ballDiameter }: PendulumProps) {
       />
     </div>
   );
+}
+
+function DrawnPendulum({
+  angle,
+  length,
+  animatedChild,
+  staticChild,
+  width,
+  height,
+  transformOrigin,
+}: DrawnPendulumProps) {
+  return (
+    <div className="relative">
+      <div
+        style={{
+          transform: `rotate(${angle}rad)`,
+          transformOrigin: transformOrigin,
+        }}
+        className="absolute"
+      >
+        {animatedChild}
+      </div>
+      {staticChild}
+    </div>
+  );
+}
+
+interface DrawnPendulumProps {
+  angle: number;
+  length?: number;
+  animatedChild: ReactNode;
+  staticChild: ReactNode;
+  width: number;
+  height: number;
+  transformOrigin?: string;
 }
 
 interface PendulumProps {
