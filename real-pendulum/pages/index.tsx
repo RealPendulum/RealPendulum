@@ -1,6 +1,10 @@
 import React, { useCallback, useRef, useState, type ReactNode } from "react";
 import { Button } from "@mui/material";
-import { PendulumType, PendulumContainer } from "@/app/pendulum";
+import {
+  PendulumType,
+  PendulumContainer,
+  DrawnPendulumContainer,
+} from "@/app/pendulum";
 import "@/app/globals.css";
 import NavigationBar from "@/app/navigation";
 import Urls from "@/app/urls";
@@ -16,7 +20,7 @@ export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const Slide = Slides[currentSlide];
   return (
-    <div>
+    <>
       <NavigationBar currentSiteUrl={Urls.homeURL} />
       <div className="overflow-auto mb-[200px]">
         <Slide setCurrentSlide={setCurrentSlide} />
@@ -31,7 +35,7 @@ export default function Info() {
           setCurrentSlide={setCurrentSlide}
         />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -142,7 +146,7 @@ function ThreePendulums() {
   }, []);
 
   return (
-    <div className="relative w-80 h-80">
+    <div className="w-80 h-80">
       <div className="absolute left-1/2">
         <PendulumContainer
           start={start}
@@ -194,17 +198,54 @@ function Slide1() {
           {"we rarely see pendulums in our lives."}
         </span>
       </div>
-      <Figure text="PLACEHOLDER: SMALL PENDULUM CLOCK HERE">
-        <PendulumContainer
-          color="lightgreen"
-          pendulumParams={{
-            initialAngle: 0.5,
-            initialSpeed: 0,
-            pendulumType: PendulumType.ODE,
-          }}
-        />
-      </Figure>
+      <ClockPendulum />
     </SlideTemplate>
+  );
+}
+
+function ClockPendulum() {
+  const size = 600;
+  const staticChild = (
+    <div>
+      <Image
+        src="/assets/clock_face.png"
+        alt="Clock face"
+        width={size}
+        height={size}
+        className="absolute"
+      />
+      <Image
+        src="/assets/clock_static.png"
+        alt="Static clock"
+        width={size}
+        height={size}
+      />
+    </div>
+  );
+  const animatedChild = (
+    <Image
+      src="/assets/clock_animated.png"
+      alt="Animated clock"
+      width={size}
+      height={size}
+      className="translate-y-[-10px]"
+    />
+  );
+  return (
+    <div className="m-16">
+      <DrawnPendulumContainer
+        pendulumParams={{
+          initialAngle: 0.08,
+          initialSpeed: 0,
+          pendulumType: PendulumType.ODE,
+        }}
+        staticChild={staticChild}
+        animatedChild={animatedChild}
+        width={size}
+        height={size}
+        transformOrigin="50% 37%"
+      />
+    </div>
   );
 }
 
