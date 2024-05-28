@@ -1,6 +1,10 @@
 import React, { useCallback, useRef, useState, type ReactNode } from "react";
 import { Button } from "@mui/material";
-import { PendulumType, PendulumContainer } from "@/app/pendulum";
+import {
+  PendulumType,
+  PendulumContainer,
+  DrawnPendulumContainer,
+} from "@/app/pendulum";
 import "@/app/globals.css";
 import NavigationBar from "@/app/navigation";
 import Urls from "@/app/urls";
@@ -16,9 +20,9 @@ export default function Info() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const Slide = Slides[currentSlide];
   return (
-    <div>
+    <>
       <NavigationBar currentSiteUrl={Urls.homeURL} />
-      <div className="overflow-auto mb-[200px]">
+      <div className="overflow-auto mb-[200px] pt-10">
         <Slide setCurrentSlide={setCurrentSlide} />
       </div>
       <div className="fixed bg-white bottom-0">
@@ -31,7 +35,7 @@ export default function Info() {
           setCurrentSlide={setCurrentSlide}
         />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -142,7 +146,7 @@ function ThreePendulums() {
   }, []);
 
   return (
-    <div className="relative w-80 h-80">
+    <div className="w-80 h-80">
       <div className="absolute left-1/2">
         <PendulumContainer
           start={start}
@@ -194,17 +198,54 @@ function Slide1() {
           {"we rarely see pendulums in our lives."}
         </span>
       </div>
-      <Figure text="PLACEHOLDER: SMALL PENDULUM CLOCK HERE">
-        <PendulumContainer
-          color="lightgreen"
-          pendulumParams={{
-            initialAngle: 0.5,
-            initialSpeed: 0,
-            pendulumType: PendulumType.ODE,
-          }}
-        />
-      </Figure>
+      <ClockPendulum />
     </SlideTemplate>
+  );
+}
+
+function ClockPendulum() {
+  const size = 600;
+  const staticChild = (
+    <div>
+      <Image
+        src="/assets/clock_face.png"
+        alt="Clock face"
+        width={size}
+        height={size}
+        className="absolute"
+      />
+      <Image
+        src="/assets/clock_static.png"
+        alt="Static clock"
+        width={size}
+        height={size}
+      />
+    </div>
+  );
+  const animatedChild = (
+    <Image
+      src="/assets/clock_animated.png"
+      alt="Animated clock"
+      width={size}
+      height={size}
+      className="translate-y-[-10px]"
+    />
+  );
+  return (
+    <div className="m-16">
+      <DrawnPendulumContainer
+        pendulumParams={{
+          initialAngle: 0.08,
+          initialSpeed: 0,
+          pendulumType: PendulumType.ODE,
+        }}
+        staticChild={staticChild}
+        animatedChild={animatedChild}
+        width={size}
+        height={size}
+        transformOrigin="50% 37%"
+      />
+    </div>
   );
 }
 
@@ -220,7 +261,8 @@ function Slide2() {
           " The only thing that comes to my mind as a real world example would be the swing currently. But who looks at the swing with a thought of its 'pendulumness'?"
         }
       </div>
-      <Figure text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM">
+      {/* text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM" */}
+      <Figure>
         <PendulumContainer
           color="orange"
           pendulumParams={{
@@ -442,7 +484,7 @@ function Slide9() {
         {"What does it mean? Are we doomed? What can we do about it?"}
         <div className="font-bold">{"There are two ways."}</div>
       </div>
-      <Figure text="PLACEHOLDER: CROSSROADS" />
+      {/* <Figure text="PLACEHOLDER: CROSSROADS" /> */}
     </SlideTemplate>
   );
 }
@@ -510,7 +552,7 @@ function Slide12() {
           "Now all you need to do is to put it into a calculator. Mine is pretty good at it!"
         }
       </div>
-      <Figure text="PLACEHOLDER: CALCULATOR" />
+      {/* <Figure text="PLACEHOLDER: CALCULATOR" /> */}
     </SlideTemplate>
   );
 }
@@ -529,7 +571,7 @@ function Slide13() {
         <span className="font-bold">{"Extremely boring!"}</span>
         {" That's why we use computers for it."}
       </div>
-      <Figure text="PLACEHOLDER: AN OLD COMPUTER" />
+      {/* <Figure text="PLACEHOLDER: AN OLD COMPUTER" /> */}
     </SlideTemplate>
   );
 }
@@ -608,7 +650,7 @@ function Slide15() {
         </a>
         {"."}
       </div>
-      <Figure text="PLACEHOLDER: A CAT TOYING WITH A PENDULUM" />
+      {/* <Figure text="PLACEHOLDER: A CAT TOYING WITH A PENDULUM" /> */}
     </SlideTemplate>
   );
 }

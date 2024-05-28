@@ -24,8 +24,8 @@ const GameSites: React.FC<LevelProps>[] = [Difficulty, Easy, Medium, Hard];
 function Difficulty({ currentSite, setCurrentSite }: LevelProps) {
   return (
     <>
-      <div className="flex flex-row">
-        <div className="flex-1 grow-1 px-[10vw] py-[12vh]">
+      <div className="flex flex-row px-[10vw] py-[12vh]">
+        <div className="flex-1 grow-1 bg-orange-300 bg-opacity-5 p-5 border-4 ">
           <div className="flex justify-center text-black text-2xl">
             Difficulty
           </div>
@@ -56,14 +56,16 @@ function Difficulty({ currentSite, setCurrentSite }: LevelProps) {
             </Button>
           </div>
         </div>
-        <div className="flex-1 grow-1 px-[10vw] py-[12vh] text-black">
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum."
+        <div className="flex flex-col ml-10 bg-lime-300 bg-opacity-5 p-5 border-4">
+          <div className="text-xl text-center font-bold text-black">
+            How to play
+          </div>
+          <div className=" text-black">
+            You will be presented with two pendulums. One of them will have its
+            movement calculated by an exact, numerical solution. The other will
+            be approximated. Your task is to select the one that is using the
+            exact solution.
+          </div>
         </div>
       </div>
     </>
@@ -146,7 +148,7 @@ export function TwoPendulums({
     <div className="grid grid-cols-3 gap-4 py-[6vh] w-[60vw]">
       <div className="col-start-1 col-span-2">
         <div className="flex justify-center">
-          <div className="flex flex-row justify-between w-40 mb-6">
+          <div className="flex flex-row justify-between w-40 mb-6 z-20">
             <div className="h-80">
               <MyPendulumContainer
                 start={start}
