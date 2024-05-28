@@ -22,7 +22,7 @@ export default function Info() {
   return (
     <>
       <NavigationBar currentSiteUrl={Urls.homeURL} />
-      <div className="overflow-auto mb-[200px]">
+      <div className="overflow-auto mb-[200px] pt-10">
         <Slide setCurrentSlide={setCurrentSlide} />
       </div>
       <div className="fixed bg-white bottom-0">
@@ -261,7 +261,8 @@ function Slide2() {
           " The only thing that comes to my mind as a real world example would be the swing currently. But who looks at the swing with a thought of its 'pendulumness'?"
         }
       </div>
-      <Figure text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM">
+      {/* text="PLACEHOLDER: SWING WITH A CHILD AS A PENDULUM" */}
+      <Figure>
         <PendulumContainer
           color="orange"
           pendulumParams={{
@@ -483,7 +484,7 @@ function Slide9() {
         {"What does it mean? Are we doomed? What can we do about it?"}
         <div className="font-bold">{"There are two ways."}</div>
       </div>
-      <Figure text="PLACEHOLDER: CROSSROADS" />
+      {/* <Figure text="PLACEHOLDER: CROSSROADS" /> */}
     </SlideTemplate>
   );
 }
@@ -551,7 +552,7 @@ function Slide12() {
           "Now all you need to do is to put it into a calculator. Mine is pretty good at it!"
         }
       </div>
-      <Figure text="PLACEHOLDER: CALCULATOR" />
+      {/* <Figure text="PLACEHOLDER: CALCULATOR" /> */}
     </SlideTemplate>
   );
 }
@@ -570,7 +571,7 @@ function Slide13() {
         <span className="font-bold">{"Extremely boring!"}</span>
         {" That's why we use computers for it."}
       </div>
-      <Figure text="PLACEHOLDER: AN OLD COMPUTER" />
+      {/* <Figure text="PLACEHOLDER: AN OLD COMPUTER" /> */}
     </SlideTemplate>
   );
 }
@@ -649,7 +650,7 @@ function Slide15() {
         </a>
         {"."}
       </div>
-      <Figure text="PLACEHOLDER: A CAT TOYING WITH A PENDULUM" />
+      {/* <Figure text="PLACEHOLDER: A CAT TOYING WITH A PENDULUM" /> */}
     </SlideTemplate>
   );
 }
