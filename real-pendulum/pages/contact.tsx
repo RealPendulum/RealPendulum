@@ -7,7 +7,7 @@ export default function Contact() {
   return (
     <>
       <NavigationBar currentSiteUrl={Urls.contactURL} />
-      <div className="flex min-h-screen justify-center items-start">
+      <div className="flex min-h-screen justify-center items-start pt-8">
         <Person
           name="Agnieszka Trojanowska"
           github="Agnieszka0544"
@@ -26,7 +26,7 @@ export default function Contact() {
 
 function Person({ name, github, mail, twitter }: PersonProps) {
   return (
-    <div className="flex flex-col justify-center m-5 p-5 bg-gradient-to-br from-indigo-100 to-orange-200 transform w-[40vw] max-w-[300px]">
+    <div className="flex flex-col justify-center m-5 p-5 pl-10 bg-gradient-to-br from-indigo-100 to-orange-200 rounded-xl transform w-[40vw] max-w-[300px]">
       <div className="text-lg font-bold drop-shadow-md">{name}</div>
       <div className="flex flex-row self-start">
         <Link

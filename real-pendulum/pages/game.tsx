@@ -25,7 +25,7 @@ function Difficulty({ currentSite, setCurrentSite }: LevelProps) {
   return (
     <>
       <div className="flex flex-row px-[10vw] py-[12vh]">
-        <div className="flex-1 grow-1 bg-orange-300 bg-opacity-5 p-5 border-4 ">
+        <div className="flex-1 grow-1 bg-white bg-opacity-30 pt-8 px-5 rounded-3xl">
           <div className="flex justify-center text-black text-2xl">
             Difficulty
           </div>
@@ -56,7 +56,7 @@ function Difficulty({ currentSite, setCurrentSite }: LevelProps) {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col ml-10 bg-lime-300 bg-opacity-5 p-5 border-4">
+        <div className="flex flex-col ml-10  bg-white bg-opacity-30 pt-8 px-10 rounded-3xl">
           <div className="text-xl text-center font-bold text-black">
             How to play
           </div>

@@ -25,7 +25,7 @@ function Playground() {
   const EPS = 0.05;
 
   return (
-    <div className="flex flex-row justify-center">
+    <div className="flex flex-row justify-center mb-16 mt-5">
       <div className="flex flex-col">
         <div className="flex flex-row">
           <div className="w-80 h-80" />
@@ -47,7 +47,7 @@ function Playground() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col justify-evenly w-96 bg-white p-8 rounded border-black border-2 bg-opacity-25 m-5">
+      <div className="flex flex-col justify-evenly w-96 bg-white p-8 rounded-3xl bg-opacity-30 m-5">
         <LabeledSlider
           label="Initial angle"
           defaultValue={initialAngle}
